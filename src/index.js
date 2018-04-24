@@ -1,23 +1,57 @@
-const debug = require('debug')('coinman:index');
-const error = require('debug')('coinman:error');
+const coreLog = require('debug')('coinman:core');
 
-const persist = require('./db/persist');
-const { binance, telegram } = require('./core');
+const {
+  telegram,
+  writer,
+  Broker,
+  DataKeeper,
+  fetcher,
+  letterMan: letterManInit,
+} = require('./core');
+const MainStrategy = require('./strategies/Main');
+const binanceApi = require('./exchanges/binance');
+const system = require('./analytics/system');
 
-const { binanceWS, binanceRest } = binance.init({ beautify: true });
-const telgramBot = telegram.init();
-// binanceRest();
-// binanceWS();
+system.monitorSystem();
 
+const { sendMessage } = telegram.init();
+const dataKeeper = new DataKeeper();
 
-// binanceWS.onUserData(binanceRest, (data) => {
-//   console.log(data);
-// }, 30000) // Optional, how often the keep alive should be sent in milliseconds
-//   .then((ws) => {
-//     // websocket instance available here
-//   })
-//   .catch(e => error(e));
+const pairs = Object.keys(writer.assetsDB);
 
-// binanceWS.onKline('BNBBTC', '1m', (data) => {
-//   console.log(data);
-// });
+const letterMan = letterManInit({ dataKeeper, writer });
+
+const { binanceWS, binanceRest } = binanceApi({ beautify: false, sendMessage, pairs, letterMan });
+const bnbRest = binanceRest();
+
+const init = fetcher({ binanceRest: bnbRest, pairs });
+
+const broker = new Broker({ binanceRest: bnbRest, sendMessage });
+
+const mainStrategy = new MainStrategy({ dataKeeper, broker, letterMan });
+
+init.fetchInitialData()
+  .then((data) => { // candles
+    data.forEach((d, index) => {
+      dataKeeper.setupProperty({
+        pair: pairs[index],
+        data: {
+          ...writer.assetsDB[pairs[index]],
+          ...MainStrategy.processCandles(d),
+        },
+      });
+    });
+
+    const { connectedPairs } = binanceWS(bnbRest);
+
+    (function startCheck() {
+      let start;
+      Object.keys(connectedPairs).every((pair) => {
+        start = connectedPairs[pair];
+        return connectedPairs[pair];
+      });
+      if (!start) return setTimeout(startCheck, 500);
+      coreLog('All websockets connected');
+      mainStrategy.init();
+    }());
+  });

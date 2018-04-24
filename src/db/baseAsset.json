@@ -1,0 +1,68 @@
+{
+  "BNBBTC": {
+    "asset": "BNB",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  },
+  "XLMBTC": {
+    "asset": "XLM",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  },
+  "XVGBTC": {
+    "asset": "XVG",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  },
+  "TRXBTC": {
+    "asset": "TRX",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  },
+  "ETHBTC": {
+    "asset": "ETH",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  },
+  "QTUMBTC": {
+    "asset": "QTUM",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  },
+  "ADABTC": {
+    "asset": "ADA",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  },
+  "LUNBTC": {
+    "asset": "LUN",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  },
+  "ARKBTC": {
+    "asset": "ARK",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  },
+  "LSKBTC": {
+    "asset": "LSK",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  },
+  "ZRXBTC": {
+    "asset": "ZRX",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
+  }
+}

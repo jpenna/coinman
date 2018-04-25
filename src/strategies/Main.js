@@ -4,16 +4,20 @@ const { CronJob } = require('cron');
 
 const wma = require('../indicators/wma');
 const debug = require('debug')('coinman:strategyMain');
+const debugError = require('debug')('coinman:strategyMain:error');
 
 const log = require('simple-node-logger').createSimpleLogger('logs/orders.log');
 
 class MainStrategy {
-  constructor({ dataKeeper, dispatcher, letterMan }) {
+  constructor({ dataKeeper, dispatcher, letterMan, sendMessage }) {
     this.dataKeeper = dataKeeper;
     this.dispatcher = dispatcher;
     this.letterMan = letterMan;
     this.schedule = {};
+    this.sendMessage = sendMessage;
+
     this.interval = 5000;
+    this.fee = 0.0005;
   }
 
   static processCandles(data) {
@@ -25,8 +29,16 @@ class MainStrategy {
   }
 
   init() {
-    debug(`Initializing Main Strategy. Running every ${this.interval}`);
-    clearInterval(this.runInterval);
+    debug(`Initializing Main Strategy. Running every ${this.interval}ms`);
+    clearTimeout(this.runTimeout);
+
+    Object.keys(this.dataKeeper).forEach((pair) => {
+      const { buyTime, candles } = this.dataKeeper[pair];
+      if (!buyTime) return;
+      const lastCandle = candles[candles.length - 1];
+      this.scheduleFrameUpdate(pair, buyTime, lastCandle[6]);
+    });
+
     this.run();
   }
 
@@ -56,14 +68,17 @@ class MainStrategy {
 
   unscheduleFrameUpdate(pair) {
     clearTimeout(this.schedule[pair]);
-    if (this.schedule[pair].running) this.schedule[pair].stop();
-    // TODO throw error here to test DB backup
+    if ((this.schedule[pair] || {}).running) this.schedule[pair].stop();
+
+    if (!this.schedule[pair]) {
+      debugError(`${pair} was not SCHEDULED. All SELL should have a schedule for frames.`);
+    }
+
     this.letterMan.updateFrameCount({ pair, increment: 0 });
   }
 
   run() {
-    Object.keys(this.dataKeeper).forEach((pair) => { // eslint-disable-line
-      if (!this.dataKeeper[pair].on) return console.log('not on', this.dataKeeper.data[pair]);
+    Object.keys(this.dataKeeper).forEach((pair) => {
       const { asset, buyPrice, buyTime, frameCount, wma8, wma4, current, candles } = this.dataKeeper[pair];
       const lastCandle = candles[candles.length - 1];
 
@@ -72,7 +87,13 @@ class MainStrategy {
       const time = lastCandle[0];
 
       if (!buyPrice && current > wma8 && current > wma4 && threshold_8) {
-        log.info(`(B) ${asset} -- ${price}\ncurrent: ${current}, wma8: ${wma8}, wma4: ${wma4}`);
+        const text = `(B) ${asset}: ${price} BTC`;
+        this.sendMessage(`*${Date()}*\ntext`);
+        debug(text);
+
+        log.info(`${text}\ncurrent: ${current}, wma8: ${wma8}, wma4: ${wma4}\nThreshold (${threshold_8}) -- 0.5% = ${wma8 * 0.005} | diff = ${Math.abs(wma8 - current)}`);
+
+
         this.letterMan.setBuyPrice({ pair, buyPrice: price, buyTime: time });
         this.scheduleFrameUpdate(pair, buyTime, lastCandle[6]);
         return;
@@ -84,7 +105,12 @@ class MainStrategy {
             ? current < wma4 && ((wma4 * 0.005) < Math.abs(wma4 - current)) // threshold_4
             : current < wma8 && current < wma4 && threshold_8;
         if (sellCondition) {
-          log.debug(`(S) ${asset} -- ${price}\nProfit: ${price - buyPrice} (${(price - buyPrice) / buyPrice})\nTime elapsed after buy: ${((time - buyTime) / 60000).toFixed(1)} minutes\nCurrent: ${current}, wma8: ${wma8}, wma4: ${wma4}`);
+          const text = `(S) ${asset}: ${price} BTC\nProfit: ${(((price - buyPrice) / buyPrice) - this.fee).toFixed(2)}%)`;
+          this.sendMessage(`*${Date()}*\n${text}`);
+          debug(text);
+
+          log.debug(`${text}\nTime elapsed after buy: ${((time - buyTime) / 60000).toFixed(1)} minutes\nCurrent: ${current}, wma8: ${wma8}, wma4: ${wma4}`);
+
           this.letterMan.setBuyPrice({ pair, buyPrice: 0, buyTime: 0 });
           this.unscheduleFrameUpdate(pair);
         }

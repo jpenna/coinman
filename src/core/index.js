@@ -1,5 +1,5 @@
 const telegram = require('./telegram');
-const writer = require('./writer');
+const dbManager = require('./dbManager');
 const Broker = require('./Broker');
 const DataKeeper = require('./DataKeeper');
 const fetcher = require('./fetcher');
@@ -7,7 +7,7 @@ const LetterMan = require('./LetterMan');
 
 module.exports = {
   telegram,
-  writer,
+  dbManager,
   Broker,
   DataKeeper,
   fetcher,

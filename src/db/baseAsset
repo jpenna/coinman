@@ -87,5 +87,11 @@ try {
     "base": "BTC",
     "trust": 1,
     "on": true
+  },
+  "XRPBTC": {
+    "asset": "XRP",
+    "base": "BTC",
+    "trust": 1,
+    "on": true
   }
 }

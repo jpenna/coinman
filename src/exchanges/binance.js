@@ -10,12 +10,15 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
     coreLog('Initializing Binance WS');
     const bnbWS = new binanceApi.BinanceWS(beautify);
     const { streams } = bnbWS;
+    let connectedCount = 0;
 
     const { candleStreams, connectedPairs } = pairs.reduce((acc, pair) => {
       acc.candleStreams.push(streams.kline(pair, '30m'));
       acc.connectedPairs[pair] = false;
       return acc;
     }, { candleStreams: [], connectedPairs: {} });
+
+    const candleStreamsLength = candleStreams.length;
 
     bnbWS.onUserData(binanceRest, (data) => {
       console.log(data);
@@ -27,6 +30,12 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
         // websocket instance available here
       }).catch(e => errorLog(e));
 
+    const cancelBot = setTimeout(() => {
+      bnbLog('Timeout. All websockets did not connect on time (2 min)');
+      process.emit('SIGINT');
+    }, 120000);
+
+    console.time('All websockets connected');
     bnbWS.onCombinedStream(
       candleStreams,
       ({ data }) => {
@@ -34,37 +43,16 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
         const { E: time, k: { s: pair, o, c, h, l, x: isOver, T: closeTime } } = data;
 
         if (!connectedPairs[pair]) {
-          bnbLog(`Connected ${pair} websocket`);
+          connectedCount++;
+          bnbLog(`Connected ${pair} websocket (${connectedCount}/${candleStreamsLength})`);
           connectedPairs[pair] = true;
+          if (connectedCount === candleStreamsLength) {
+            bnbLog(console.timeEnd('All websockets connected'));
+            clearTimeout(cancelBot);
+          }
         }
 
         letterMan.receivedBinanceCandle({ time, pair, o, c, h, l, isOver, closeTime });
-
-        // TODO remove comments of API and put it in README.md
-        //  {
-        //   "e": "kline",     // Event type
-        //   "E": 123456789,   // Event time
-        //   "s": "BNBBTC",    // Symbol
-        //   "k": {
-        //     "t": 123400000, // Kline start time
-        //     "T": 123460000, // Kline close time
-        //     "s": "BNBBTC",  // Symbol
-        //     "i": "1m",      // Interval
-        //     "f": 100,       // First trade ID
-        //     "L": 200,       // Last trade ID
-        //     "o": "0.0010",  // Open price
-        //     "c": "0.0020",  // Close price
-        //     "h": "0.0025",  // High price
-        //     "l": "0.0015",  // Low price
-        //     "v": "1000",    // Base asset volume
-        //     "n": 100,       // Number of trades
-        //     "x": false,     // Is this kline closed?
-        //     "q": "1.0000",  // Quote asset volume
-        //     "V": "500",     // Taker buy base asset volume
-        //     "Q": "0.500",   // Taker buy quote asset volume
-        //     "B": "123456"   // Ignore
-        //   }
-        // }
       },
     );
 

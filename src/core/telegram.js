@@ -27,6 +27,8 @@ function init() {
 
   bot.startPolling();
 
+  // TODO get pairs status (ON/OFF)
+
   return {
     bot,
     sendMessage: msg => bot.telegram.sendMessage(whiteList[0], msg, { parse_mode: 'Markdown' }),

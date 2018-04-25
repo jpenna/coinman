@@ -1,8 +1,9 @@
-const binanceLog = require('debug')('coinman:binance');
+const errorLog = require('debug')('coinman:core');
+const debugSystem = require('debug')('coinman:system');
 
 const {
   telegram,
-  writer,
+  dbManager,
   Broker,
   DataKeeper,
   fetcher,
@@ -12,6 +13,8 @@ const MainStrategy = require('./strategies/Main');
 const binanceApi = require('./exchanges/binance');
 const system = require('./analytics/system');
 
+debugSystem(`Initializing Bot at PID ${process.pid}`);
+
 const { setup: setupGracefulExit } = require('./utils/gracefulExit');
 
 const { symbols: processSymbols } = setupGracefulExit();
@@ -20,40 +23,53 @@ system.monitorSystem();
 const { sendMessage } = telegram.init();
 const dataKeeper = new DataKeeper();
 
-const pairs = Object.keys(writer.assetsDB);
+const pairs = Object.keys(dbManager.assetsDB);
 
-const letterMan = new LetterMan({ dataKeeper, writer, skipedSymbol: processSymbols.letterManSkiped });
+const letterMan = new LetterMan({ dataKeeper, dbManager, skipedSymbol: processSymbols.letterManSkiped });
 const { binanceWS, binanceRest } = binanceApi({ beautify: false, sendMessage, pairs, letterMan });
 const bnbRest = binanceRest();
 
-const init = fetcher({ binanceRest: bnbRest, pairs });
+const init = fetcher({ binanceRest: bnbRest, pairs, sendMessage, letterMan });
 
 const broker = new Broker({ binanceRest: bnbRest, sendMessage });
 
-const mainStrategy = new MainStrategy({ dataKeeper, broker, letterMan });
+const mainStrategy = new MainStrategy({ dataKeeper, broker, letterMan, sendMessage });
 
-init.fetchInitialData()
-  .then((data) => { // candles
-    data.forEach((d, index) => {
-      dataKeeper.setupProperty({
-        pair: pairs[index],
-        data: {
-          ...writer.assetsDB[pairs[index]],
-          ...MainStrategy.processCandles(d),
-        },
-      });
+let retries = 0;
+
+async function startBot() {
+  if (retries >= 3) return errorLog(`Exiting. Maximum retries reachead (${retries})`);
+  let data;
+
+  try {
+    data = await init.fetchInitialData();
+  } catch (e) {
+    errorLog('Error fetching initial data. Retrying.', e);
+    retries++;
+    return startBot();
+  }
+
+  data.forEach((d, index) => {
+    dataKeeper.setupProperty({
+      pair: pairs[index],
+      data: {
+        ...dbManager.assetsDB[pairs[index]],
+        ...MainStrategy.processCandles(d),
+      },
     });
-
-    const { connectedPairs } = binanceWS(bnbRest);
-
-    (function startCheck() {
-      let start;
-      Object.keys(connectedPairs).every((pair) => {
-        start = connectedPairs[pair];
-        return connectedPairs[pair];
-      });
-      if (!start) return setTimeout(startCheck, 500);
-      binanceLog('All websockets connected');
-      mainStrategy.init();
-    }());
   });
+
+  const { connectedPairs } = binanceWS(bnbRest);
+
+  (function startCheck() {
+    let start;
+    Object.keys(connectedPairs).every((pair) => {
+      start = connectedPairs[pair];
+      return connectedPairs[pair];
+    });
+    if (!start) return setTimeout(startCheck, 500);
+    mainStrategy.init();
+  }());
+}
+
+startBot();

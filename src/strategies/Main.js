@@ -36,7 +36,7 @@ class MainStrategy {
     const diffCloseCandle = nextClose - buyTime;
 
     const quotient = Math.floor(diffCloseCandle / 1800000); // 30min = 30 * 60 * 1000 = 1,800,000
-    if (quotient >= 1) this.letterMan.updateFrameCount(pair, quotient);
+    if (quotient >= 1) this.letterMan.updateFrameCount({ pair, increment: quotient });
 
     const rest = diffCloseCandle % 1800000;
     const timeout = rest > 0 ? rest : 0;
@@ -45,7 +45,7 @@ class MainStrategy {
       this.schedule[pair] = new CronJob({
         cronTime: '* */30 * * * *',
         onTick() {
-          this.letterMan.updateFrameCount(pair, 1);
+          this.letterMan.updateFrameCount({ pair, increment: 1 });
         },
         start: true,
         context: this,
@@ -57,7 +57,8 @@ class MainStrategy {
   unscheduleFrameUpdate(pair) {
     clearTimeout(this.schedule[pair]);
     if (this.schedule[pair].running) this.schedule[pair].stop();
-    this.letterMan.updateFrameCount(pair, 0);
+    // TODO throw error here to test DB backup
+    this.letterMan.updateFrameCount({ pair, increment: 0 });
   }
 
   run() {
@@ -72,7 +73,7 @@ class MainStrategy {
 
       if (!buyPrice && current > wma8 && current > wma4 && threshold_8) {
         log.info(`(B) ${asset} -- ${price}\ncurrent: ${current}, wma8: ${wma8}, wma4: ${wma4}`);
-        this.letterMan.setBuyPrice(pair, price, time);
+        this.letterMan.setBuyPrice({ pair, buyPrice: price, buyTime: time });
         this.scheduleFrameUpdate(pair, buyTime, lastCandle[6]);
         return;
       }
@@ -84,7 +85,7 @@ class MainStrategy {
             : current < wma8 && current < wma4 && threshold_8;
         if (sellCondition) {
           log.debug(`(S) ${asset} -- ${price}\nProfit: ${price - buyPrice} (${(price - buyPrice) / buyPrice})\nTime elapsed after buy: ${((time - buyTime) / 60000).toFixed(1)} minutes\nCurrent: ${current}, wma8: ${wma8}, wma4: ${wma4}`);
-          this.letterMan.setBuyPrice(pair, 0, 0);
+          this.letterMan.setBuyPrice({ pair, buyPrice: 0, buyTime: 0 });
           this.unscheduleFrameUpdate(pair);
         }
       }

@@ -3,7 +3,7 @@ const writer = require('./writer');
 const Broker = require('./Broker');
 const DataKeeper = require('./DataKeeper');
 const fetcher = require('./fetcher');
-const letterMan = require('./letterMan');
+const LetterMan = require('./LetterMan');
 
 module.exports = {
   telegram,
@@ -11,5 +11,5 @@ module.exports = {
   Broker,
   DataKeeper,
   fetcher,
-  letterMan,
+  LetterMan,
 };

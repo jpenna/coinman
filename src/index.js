@@ -1,4 +1,4 @@
-const coreLog = require('debug')('coinman:core');
+const binanceLog = require('debug')('coinman:binance');
 
 const {
   telegram,
@@ -6,12 +6,15 @@ const {
   Broker,
   DataKeeper,
   fetcher,
-  letterMan: letterManInit,
+  LetterMan,
 } = require('./core');
 const MainStrategy = require('./strategies/Main');
 const binanceApi = require('./exchanges/binance');
 const system = require('./analytics/system');
 
+const { setup: setupGracefulExit } = require('./utils/gracefulExit');
+
+const { symbols: processSymbols } = setupGracefulExit();
 system.monitorSystem();
 
 const { sendMessage } = telegram.init();
@@ -19,8 +22,7 @@ const dataKeeper = new DataKeeper();
 
 const pairs = Object.keys(writer.assetsDB);
 
-const letterMan = letterManInit({ dataKeeper, writer });
-
+const letterMan = new LetterMan({ dataKeeper, writer, skipedSymbol: processSymbols.letterManSkiped });
 const { binanceWS, binanceRest } = binanceApi({ beautify: false, sendMessage, pairs, letterMan });
 const bnbRest = binanceRest();
 
@@ -51,7 +53,7 @@ init.fetchInitialData()
         return connectedPairs[pair];
       });
       if (!start) return setTimeout(startCheck, 500);
-      coreLog('All websockets connected');
+      binanceLog('All websockets connected');
       mainStrategy.init();
     }());
   });

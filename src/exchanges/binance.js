@@ -3,7 +3,7 @@ const coreLog = require('debug')('coinman:core');
 const errorLog = require('debug')('coinman:coreError');
 const bnbLog = require('debug')('coinman:binance');
 
-bnbLog.log = console.log.bind(console);
+bnbLog.log = console.error.bind(console); // eslint-disable-line no-console
 
 module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
   binanceWS(binanceRest) {
@@ -34,13 +34,13 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
         const { E: time, k: { s: pair, o, c, h, l, x: isOver, T: closeTime } } = data;
 
         if (!connectedPairs[pair]) {
-          bnbLog(`BNB LOG => Connected ${pair} websocket`);
-          console.log(`Connected ${pair} websocket`);
+          bnbLog(`Connected ${pair} websocket`);
           connectedPairs[pair] = true;
         }
 
         letterMan.receivedBinanceCandle({ time, pair, o, c, h, l, isOver, closeTime });
 
+        // TODO remove comments of API and put it in README.md
         //  {
         //   "e": "kline",     // Event type
         //   "E": 123456789,   // Event time
@@ -67,6 +67,20 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
         // }
       },
     );
+
+    // TODO try to get all names
+    //     function patchEmitter(emitter, websocket) {
+    //       var oldEmit = emitter.emit;
+
+    //       emitter.emit = function () {
+    //         var emitArgs = arguments;
+    //       // serialize arguments in some way.
+    //       ...
+    //       // send them through the websocket received as a parameter
+    //       ...
+    //   oldEmit.apply(emitter, arguments);
+    // }
+    // }
 
     return { connectedPairs };
   },

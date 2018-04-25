@@ -11,6 +11,7 @@ module.exports = {
       "tabWidth": 2,
       "ignoreUrls": true,
       "ignoreTrailingComments": true,
-    }]
+    }],
+    "no-plusplus": 0,
   }
 };

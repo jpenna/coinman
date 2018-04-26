@@ -44,7 +44,6 @@ class MainStrategy {
   // frameCount counts the number of candles after BUY take place,
   // used to leave a position faster if there is a great move of price in a short period
   scheduleFrameUpdate({ pair, buyTime, lastCandle }) {
-    console.log('scheduleFrameUpdate', pair);
     if (this.schedule[pair]) return;
     const diffCloseCandle = lastCandle[6] - buyTime;
 
@@ -54,14 +53,11 @@ class MainStrategy {
     const rest = diffCloseCandle % 1800000;
     const timeout = rest > 0 ? rest : 0;
 
-    console.log('timeout time on init', pair, timeout);
 
     this.schedule[pair] = setTimeout(() => {
-      console.log('run timeout', pair);
       this.schedule[pair] = new CronJob({
-        cronTime: '* */5 * * * *',
+        cronTime: '0 */5 * * * *',
         onTick() {
-          console.log('run tick', pair);
           const { candles, buyPrice } = this.dataKeeper[pair];
           const [, open, high, low, close, volume] = candles[candles.length - 1];
           this.mainLogger.telegramTick({ pair, open, high, low, close, volume, buyPrice });
@@ -76,7 +72,6 @@ class MainStrategy {
 
   unscheduleFrameUpdate(pair) {
     clearTimeout(this.schedule[pair]);
-    console.log('print (this.schedule[pair] || {}).running', (this.schedule[pair] || {}).running);
     if ((this.schedule[pair] || {}).running) this.schedule[pair].stop();
 
     if (!this.schedule[pair]) {

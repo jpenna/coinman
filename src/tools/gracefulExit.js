@@ -50,7 +50,7 @@ function setup({ sendMessage }) {
   });
 
   process.on('cleanup', (code) => {
-    if (process[skipCleanup]) return debugError('SKIP CLEANUP WAS CALLED!!!');
+    if (process[skipCleanup]) return debugError('CLEANUP WAS CALLED AGAIN!!! There is some error leaking in the cleanup process.');
     process[skipCleanup] = true;
     sendMessage(`🔴 Bot exiting with code: ${code} - ${codeMap.get(code)}`);
   });

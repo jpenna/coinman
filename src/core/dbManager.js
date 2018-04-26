@@ -44,6 +44,7 @@ function createBackup() {
       });
       promises.push(saving);
     });
+    dbDebug(`Creating backups (${promises.length})`);
     resolve(Promise.all(promises));
   });
 }
@@ -103,11 +104,6 @@ function removeOrder({ pair }) {
   updateDB(ordersDBPath);
 }
 
-function updateBuyPrice({ pair, buyPrice, buyTime }) {
-  Object.assign(assetsDB[pair], { buyPrice, buyTime });
-  updateDB(assetsDBPath);
-}
-
 function updateAssetsProperty(pair, data) {
   Object.assign(assetsDB[pair], data);
   updateDB(assetsDBPath);
@@ -123,7 +119,6 @@ module.exports = {
   assetsDB,
   addOrder,
   removeOrder,
-  updateBuyPrice,
   updateAssetsProperty,
   updateOrdersProperty,
 };

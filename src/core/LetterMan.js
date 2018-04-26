@@ -44,9 +44,14 @@ class LetterMan {
     this.dataKeeper.updateMainStrategyValues(data);
   }
 
-  setBuyPrice({ pair, buyPrice, buyTime }) {
-    this.dataKeeper.updateProperty(pair, { buyPrice, buyTime });
-    this.dbManager.updateBuyPrice({ pair, buyPrice, buyTime });
+  setBuyPrice({ pair, buyPrice, buyTime, lowerBand }) {
+    this.dataKeeper.updateProperty(pair, { buyPrice, buyTime, lowerBand });
+    this.dbManager.updateAssetsProperty(pair, { buyPrice, buyTime, lowerBand });
+  }
+
+  setLowerBand({ pair, lowerBand }) {
+    this.dataKeeper.updateProperty(pair, { lowerBand });
+    this.dbManager.updateAssetsProperty(pair, { lowerBand });
   }
 
   updateFrameCount({ pair, increment }) {

@@ -5,6 +5,7 @@ class LetterMan {
     this.dataKeeper = dataKeeper;
     this.dbManager = dbManager;
     this.skipedSymbol = skipedSymbol;
+    this.startTime = Date.now();
     this.runningSet = new Set();
     process.on('cleanup', LetterMan.cleanupModule.bind(this));
 
@@ -12,11 +13,14 @@ class LetterMan {
   }
 
   resetRunningSet() {
-    if (this.runningSet.size !== Object.keys(this.dataKeeper).length) {
-      const missing = Object.keys(this.dataKeeper).filter(k => !this.runningSet.has(k));
-      debugLog(`Not all assets are running ${missing}`);
+    const runningFor = `(${((Date.now() - this.startTime) / 60000).toFixed(0)} minutes)`;
+    const pairs = Object.keys(this.dataKeeper);
+    if (this.runningSet.size !== pairs.length) {
+      const missing = pairs.filter(k => !this.runningSet.has(k));
+      const msg = `Not all assets are running (${missing.length}): ${missing} ${runningFor}`;
+      debugLog(msg);
     } else {
-      debugLog('All assets are running. Next check in 3 minutes.');
+      debugLog(`All assets are running ${runningFor}`);
     }
 
     this.runningSet.clear();
@@ -48,6 +52,12 @@ class LetterMan {
   updateFrameCount({ pair, increment }) {
     const frameCount = increment ? (this.dataKeeper[pair].frameCount || 0) + increment : 0;
     this.dataKeeper.updateProperty(pair, { frameCount });
+  }
+
+  setWithTimeAssets({ pair, name, value, time }) {
+    const now = time || Date.now();
+    this.dataKeeper.updateProperty(pair, { [name]: value, [`${name}Time`]: now });
+    this.dbManager.updateAssetsProperty(pair, { [name]: value, [`${name}Time`]: now });
   }
 }
 

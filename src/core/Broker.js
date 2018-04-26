@@ -1,6 +1,6 @@
-const error = require('debug')('coinman:dispatcher:error');
+const error = require('debug')('coinman:broker:error');
 
-class Dispatch {
+class Broker {
   constructor({ binanceRest, sendMessage }) {
     this.binanceRest = binanceRest;
     this.sendMessage = sendMessage;
@@ -38,7 +38,7 @@ class Dispatch {
   }
 }
 
-module.exports = Dispatch;
+module.exports = Broker;
 
 // symbol	STRING	YES
 // side	ENUM	YES

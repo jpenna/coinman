@@ -12,16 +12,15 @@ const {
 const MainStrategy = require('./strategies/Main');
 const binanceApi = require('./exchanges/binance');
 const system = require('./analytics/system');
+const { setup: setupGracefulExit } = require('./tools/gracefulExit');
 
 debugSystem(`Initializing Bot at PID ${process.pid}`);
 
-const { setup: setupGracefulExit } = require('./utils/gracefulExit');
-
-const { symbols: processSymbols } = setupGracefulExit();
 system.monitorSystem();
 
 const { sendMessage } = telegram.init();
 const dataKeeper = new DataKeeper();
+const { symbols: processSymbols } = setupGracefulExit({ sendMessage });
 
 const pairs = Object.keys(dbManager.assetsDB);
 
@@ -38,7 +37,10 @@ const mainStrategy = new MainStrategy({ dataKeeper, broker, letterMan, sendMessa
 let retries = 0;
 
 async function startBot() {
-  if (retries >= 3) return errorLog(`Exiting. Maximum retries reachead (${retries})`);
+  if (retries >= 3) {
+    errorLog(`Exiting. Maximum retries reachead (${retries})`);
+    return process.exit();
+  }
   let data;
 
   try {

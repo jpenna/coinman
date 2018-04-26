@@ -1,49 +1,58 @@
 const errorsLog = require('simple-node-logger').createSimpleLogger('logs/errors.log');
-const debugError = require('debug')('coinman:process:error');
+const debugError = require('debug')('coinman:gracefulExit');
 
-const codeMap = Object.create(null);
-Object.assign(codeMap, {
-  91: 'Uncaught Exception',
-  90: 'Unhandled Promise Rejection',
-  2: 'SIGINT',
-  98: 'SIGUSR1',
-  99: 'SIGUSR2',
-});
+const codeMap = new Map([
+  [1, 'Uncaught Exception'],
+  [2, 'Unhandled Promise Rejection'],
+  [3, 'SIGINT'],
+  [4, 'SIGUSR1'],
+  [5, 'SIGUSR2'],
+  [100, 'Error on Graceful Exit Process'],
+  [101, 'Init (Binance REST) Max tries reached'],
+]);
 
-function setup() {
+const skipCleanup = Symbol('skipCleanup');
+
+function setup({ sendMessage }) {
   const letterManSkiped = Symbol('letterManSkiped');
 
   // Capture Errors not catched and start BOT reinicialization process
   process.on('uncaughtException', (err) => {
     const errorMsg = err;
-    errorsLog.info(`Uncaught Exception -> ${errorMsg.stack}`);
+    errorsLog.error(`Uncaught Exception -> ${errorMsg.stack}`);
     debugError(`Uncaught Exception -> ${errorMsg.stack}`);
-    process.emit('cleanup', 91);
+    process.emit('cleanup', 1);
   });
 
   // Capture Promise rejections not handled and start BOT reinicialization process
   process.on('unhandledRejection', (reason, p) => {
     const errorMsg = `Promise: ${reason}`;
-    errorsLog.info(`Unhandled Rejection -> ${errorMsg}\n`, p);
+    errorsLog.error(`Unhandled Rejection -> ${errorMsg}\n`, p);
     debugError(`Unhandled Rejection -> ${errorMsg}\n`, p);
-    process.emit('cleanup', 90);
+    process.emit('cleanup', 2);
   });
 
   // catch ctrl+c event and exit normally
-  process.on('SIGINT', () => process.emit('cleanup', 2));
+  process.on('SIGINT', () => process.emit('cleanup', 3));
 
   // catches "kill pid" (for example: nodemon restart)
-  process.on('SIGUSR1', () => process.emit('cleanup', 98));
-  process.on('SIGUSR2', () => process.emit('cleanup', 99));
+  process.on('SIGUSR1', () => process.emit('cleanup', 4));
+  process.on('SIGUSR2', () => process.emit('cleanup', 5));
 
   process.on('exit', (code) => {
     const skipedCount = JSON.stringify(process[letterManSkiped], null, 2);
     debugError(`Skiped requests to LetterMan: ${skipedCount}`);
     errorsLog.info(skipedCount);
 
-    const errorMsg = `(PID ${process.pid}) Exiting with code: ${code} - ${codeMap[code]}`;
+    const errorMsg = `(PID ${process.pid}) Exiting with code: ${code} - ${codeMap.get(code)}`;
     errorsLog.info(errorMsg);
     debugError(errorMsg);
+  });
+
+  process.on('cleanup', (code) => {
+    if (process[skipCleanup]) return debugError('SKIP CLEANUP WAS CALLED!!!');
+    process[skipCleanup] = true;
+    sendMessage(`🔴 Bot exiting with code: ${code} - ${codeMap.get(code)}`);
   });
 
   return ({ symbols: { letterManSkiped } });
@@ -56,8 +65,13 @@ function gracefulExit(callback = () => { }) {
   cleanupsCount++;
 
   process.on('cleanup', async (code) => {
-    console.log('CLEANUP GRACEFULL', cleanupsCount, cleanupsRunned);
-    await callback();
+    if (process[skipCleanup]) return;
+    debugError('CLEANUP GRACEFULLY', cleanupsCount, cleanupsRunned);
+    try {
+      await callback();
+    } catch (e) {
+      debugError('Error on cleanup callback', e);
+    }
     cleanupsRunned++;
     if (cleanupsCount === cleanupsRunned) process.exit(code);
   });

@@ -20,39 +20,45 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
 
     const candleStreamsLength = candleStreams.length;
 
-    bnbWS.onUserData(binanceRest, (data) => {
-      console.log(data);
-      sendMessage(JSON.stringify(data, null, 2));
-    }, 30000) // Optional, how often the keep alive should be sent in milliseconds
-      .then((ws) => {
-        ws.on('outboundAccountInfo', console.log);
-        ws.on('executionReport', console.log);
-        // websocket instance available here
-      }).catch(e => errorLog(e));
+    // TODO fix the call on Binance lib
+    // bnbWS.onUserData(binanceRest, (data) => {
+    //   console.log(data);
+    //   // sendMessage(JSON.stringify(data, null, 2));
+    // }, 30000) // Optional, how often the keep alive should be sent in milliseconds
+    //   .then((ws) => {
+    //     ws.on('outboundAccountInfo', console.log);
+    //     ws.on('executionReport', console.log);
+    //     // websocket instance available here
+    //   }).catch(e => errorLog(e));
 
     const cancelBot = setTimeout(() => {
       bnbLog('Timeout. All websockets did not connect on time (2 min)');
       process.emit('SIGINT');
     }, 120000);
 
-    console.time('All websockets connected');
+    const startConn = Date.now();
+    let allConnected = false;
+
     bnbWS.onCombinedStream(
       candleStreams,
       ({ data }) => {
         // TODO use time to check if the candle is over in case of websocket failure
-        const { E: time, k: { s: pair, o, c, h, l, x: isOver, T: closeTime } } = data;
+        const { E: time, k: { s: pair, o, c, h, l, q: quoteVolume, x: isOver, T: closeTime } } = data;
 
         if (!connectedPairs[pair]) {
           connectedCount++;
           bnbLog(`Connected ${pair} websocket (${connectedCount}/${candleStreamsLength})`);
           connectedPairs[pair] = true;
           if (connectedCount === candleStreamsLength) {
-            bnbLog(console.timeEnd('All websockets connected'));
+            bnbLog(`All websockets connected (${((Date.now() - startConn) / 1000).toFixed(2)}sec)`);
+            allConnected = true;
             clearTimeout(cancelBot);
           }
         }
 
-        letterMan.receivedBinanceCandle({ time, pair, o, c, h, l, isOver, closeTime });
+        if (!allConnected) return;
+
+        letterMan.receivedBinanceCandle({ time, pair, o, c, h, l, quoteVolume, isOver, closeTime });
       },
     );
 

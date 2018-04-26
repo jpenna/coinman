@@ -5,7 +5,7 @@ class DataKeeper {
     this[pair] = data;
   }
 
-  updateMainStrategyValues({ time, pair, o, c, h, l, isOver, volume, closeTime }) {
+  updateMainStrategyValues({ time, pair, o, c, h, l, quoteVolume, isOver, closeTime }) {
     const { candles } = this[pair];
     const lastCandle = candles[candles.length - 1];
 
@@ -14,7 +14,7 @@ class DataKeeper {
     if (isOver) {
       newCandles = [
         ...candles.slice(1, candles.length - 1),
-        [time, o, h, l, c, volume, closeTime],
+        [time, o, h, l, c, quoteVolume, closeTime],
         [null, null, 0, Infinity, 0, 0, 0],
       ];
     } else {
@@ -26,7 +26,7 @@ class DataKeeper {
       if (l < lastCandle[3]) lastCandle[3] = l;
       lastCandle[0] = time;
       lastCandle[4] = c;
-      lastCandle[5] = volume;
+      lastCandle[5] = quoteVolume;
     }
 
     // TODO improve this calculatation to use the updated values only, not redo everything

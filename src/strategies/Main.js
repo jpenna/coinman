@@ -3,10 +3,8 @@
 const { CronJob } = require('cron');
 
 const wma = require('../indicators/wma');
-const debug = require('debug')('coinman:strategyMain');
 const debugError = require('debug')('coinman:strategyMain:error');
-
-const log = require('simple-node-logger').createSimpleLogger('logs/orders.log');
+const MainLogger = require('./Main_logger');
 
 class MainStrategy {
   constructor({ dataKeeper, dispatcher, letterMan, sendMessage }) {
@@ -15,6 +13,7 @@ class MainStrategy {
     this.letterMan = letterMan;
     this.schedule = {};
     this.sendMessage = sendMessage;
+    this.mainLogger = new MainLogger({ sendMessage });
 
     this.interval = 5000;
     this.fee = 0.0005;
@@ -29,23 +28,25 @@ class MainStrategy {
   }
 
   init() {
-    debug(`Initializing Main Strategy. Running every ${this.interval}ms`);
     clearTimeout(this.runTimeout);
 
     Object.keys(this.dataKeeper).forEach((pair) => {
       const { buyTime, candles } = this.dataKeeper[pair];
       if (!buyTime) return;
       const lastCandle = candles[candles.length - 1];
-      this.scheduleFrameUpdate(pair, buyTime, lastCandle[6]);
+      this.scheduleFrameUpdate({ pair, buyTime, lastCandle });
     });
 
+    this.mainLogger.botStarting();
     this.run();
   }
 
   // frameCount counts the number of candles after BUY take place,
   // used to leave a position faster if there is a great move of price in a short period
-  scheduleFrameUpdate(pair, buyTime, nextClose) {
-    const diffCloseCandle = nextClose - buyTime;
+  scheduleFrameUpdate({ pair, buyTime, lastCandle }) {
+    console.log('scheduleFrameUpdate', pair);
+    if (this.schedule[pair]) return;
+    const diffCloseCandle = lastCandle[6] - buyTime;
 
     const quotient = Math.floor(diffCloseCandle / 1800000); // 30min = 30 * 60 * 1000 = 1,800,000
     if (quotient >= 1) this.letterMan.updateFrameCount({ pair, increment: quotient });
@@ -53,10 +54,17 @@ class MainStrategy {
     const rest = diffCloseCandle % 1800000;
     const timeout = rest > 0 ? rest : 0;
 
+    console.log('timeout time on init', pair, timeout);
+
     this.schedule[pair] = setTimeout(() => {
+      console.log('run timeout', pair);
       this.schedule[pair] = new CronJob({
-        cronTime: '* */30 * * * *',
+        cronTime: '* */5 * * * *',
         onTick() {
+          console.log('run tick', pair);
+          const { candles, buyPrice } = this.dataKeeper[pair];
+          const [, open, high, low, close, volume] = candles[candles.length - 1];
+          this.mainLogger.telegramTick({ pair, open, high, low, close, volume, buyPrice });
           this.letterMan.updateFrameCount({ pair, increment: 1 });
         },
         start: true,
@@ -68,6 +76,7 @@ class MainStrategy {
 
   unscheduleFrameUpdate(pair) {
     clearTimeout(this.schedule[pair]);
+    console.log('print (this.schedule[pair] || {}).running', (this.schedule[pair] || {}).running);
     if ((this.schedule[pair] || {}).running) this.schedule[pair].stop();
 
     if (!this.schedule[pair]) {
@@ -77,40 +86,65 @@ class MainStrategy {
     this.letterMan.updateFrameCount({ pair, increment: 0 });
   }
 
+  includeBests({ pair, reset }) {
+    const { candles, bestSell, bestBuy } = this.dataKeeper[pair];
+    const [time, , high, low] = candles[candles.length - 1];
+    if (reset) {
+      this.letterMan.setWithTimeAssets({ pair, name: 'bestBuy', value: +low, time });
+      this.letterMan.setWithTimeAssets({ pair, name: 'bestSell', value: +high, time });
+      return;
+    }
+    if (bestSell < high) {
+      this.letterMan.setWithTimeAssets({ pair, name: 'bestSell', value: +high, time });
+    }
+    if (low < bestBuy) {
+      this.letterMan.setWithTimeAssets({ pair, name: 'bestBuy', value: +low, time });
+    }
+  }
+
   run() {
     Object.keys(this.dataKeeper).forEach((pair) => {
-      const { asset, buyPrice, buyTime, frameCount, wma8, wma4, current, candles } = this.dataKeeper[pair];
+      const { asset, buyPrice, buyTime, bestSell, bestSellTime, bestBuy, bestBuyTime, frameCount, wma8, wma4, current, candles } = this.dataKeeper[pair];
       const lastCandle = candles[candles.length - 1];
 
-      const threshold_8 = (wma8 * 0.005) < Math.abs(wma8 - current);
+      const threshold_8 = (wma8 * 0.005) <= Math.abs(wma8 - current);
       const price = +lastCandle[4];
       const time = lastCandle[0];
+      const buyCondition = current > wma8 && current > wma4 && threshold_8;
 
-      if (!buyPrice && current > wma8 && current > wma4 && threshold_8) {
-        const text = `(B) ${asset}: ${price} BTC`;
-        this.sendMessage(`*${Date()}*\ntext`);
-        debug(text);
-
-        log.info(`${text}\ncurrent: ${current}, wma8: ${wma8}, wma4: ${wma4}\nThreshold (${threshold_8}) -- 0.5% = ${wma8 * 0.005} | diff = ${Math.abs(wma8 - current)}`);
-
-
+      // Buy strategy
+      if (!buyPrice && buyCondition) {
+        this.mainLogger.buy({ asset, price });
         this.letterMan.setBuyPrice({ pair, buyPrice: price, buyTime: time });
-        this.scheduleFrameUpdate(pair, buyTime, lastCandle[6]);
+        this.scheduleFrameUpdate({ pair, buyTime, lastCandle });
+        this.includeBests({ pair, reset: true });
         return;
       }
 
+      // TODO add sell strategy for profit and leave this one for stop loss
+      // Sell strategy
       if (buyPrice) {
+        this.includeBests({ pair });
+
+        // if (buyCondition) {
+        //   const profit = current / buyPrice;
+        //   if (profit > 0.01
+        //     && profit < 0.02
+        //     && current / bestSell <= 0.99 // High can't be 1% greater than Current
+        //     && (time - bestSellTime) < 120000
+        //   ) {
+
+        //   }
+        // }
+
+        // Stop Loss
+        const withThreshold_4 = current < wma4 && ((wma4 * 0.005) < Math.abs(wma4 - current));
+        const withThreshold_8 = current < wma8 && current < wma4 && threshold_8;
         const sellCondition =
           frameCount && ((price / buyPrice) > (frameCount / 100))
-            ? current < wma4 && ((wma4 * 0.005) < Math.abs(wma4 - current)) // threshold_4
-            : current < wma8 && current < wma4 && threshold_8;
+            ? withThreshold_4 : withThreshold_8;
         if (sellCondition) {
-          const text = `(S) ${asset}: ${price} BTC\nProfit: ${(((price - buyPrice) / buyPrice) - this.fee).toFixed(2)}%)`;
-          this.sendMessage(`*${Date()}*\n${text}`);
-          debug(text);
-
-          log.debug(`${text}\nTime elapsed after buy: ${((time - buyTime) / 60000).toFixed(1)} minutes\nCurrent: ${current}, wma8: ${wma8}, wma4: ${wma4}`);
-
+          this.mainLogger.sell({ asset, price, withThreshold_4, bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, current, wma8, wma4 });
           this.letterMan.setBuyPrice({ pair, buyPrice: 0, buyTime: 0 });
           this.unscheduleFrameUpdate(pair);
         }

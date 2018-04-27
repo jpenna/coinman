@@ -29,7 +29,7 @@ class DataKeeper {
       lastCandle[5] = quoteVolume;
     }
 
-    // TODO improve this calculatation to use the updated values only, not redo everything
+    // TODO 2 improve this calculatation to use the updated values only, not redo everything
     const update = MainStrategy.processCandles(newCandles || candles);
 
     this.updateProperty(pair, update);

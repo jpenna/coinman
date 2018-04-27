@@ -20,7 +20,7 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
 
     const candleStreamsLength = candleStreams.length;
 
-    // TODO fix the call on Binance lib
+    // TODO 1 fix the call on Binance lib
     // bnbWS.onUserData(binanceRest, (data) => {
     //   console.log(data);
     //   // sendMessage(JSON.stringify(data, null, 2));
@@ -42,7 +42,7 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
     bnbWS.onCombinedStream(
       candleStreams,
       ({ data }) => {
-        // TODO use time to check if the candle is over in case of websocket failure
+        // TODO 2 use time to check if the candle is over in case of websocket failure
         const { E: time, k: { s: pair, o, c, h, l, q: quoteVolume, x: isOver, T: closeTime } } = data;
 
         if (!connectedPairs[pair]) {
@@ -62,7 +62,7 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
       },
     );
 
-    // TODO try to get all names
+    // TODO 4 try to get all names
     //     function patchEmitter(emitter, websocket) {
     //       var oldEmit = emitter.emit;
 

@@ -15,7 +15,7 @@ class MainStrategy {
 
     this.triggerLoBand = 0.015;
     this.interval = 5000;
-    this.fee = 0.0005;
+    this.fee = 0.001; // Buy: 0.05% | Sell: 0.05%
   }
 
   static processCandles(data) {
@@ -101,7 +101,8 @@ class MainStrategy {
 
   run() {
     Object.keys(this.dataKeeper).forEach((pair) => {
-      const { asset, buyPrice, buyTime, bestSell, bestSellTime, bestBuy, bestBuyTime, frameCount, wma8, wma4, candleAvg, candles, lowerBand: lastLowerBand = (buyPrice * (1 + this.triggerLoBand)) } = this.dataKeeper[pair];
+      const { asset, buyPrice, buyTime, bestSell, bestSellTime, bestBuy, bestBuyTime, frameCount, wma8, wma4, candleAvg, candles, lowerBand } = this.dataKeeper[pair];
+      // TODO remove this default for lowerBand, it is already set when buying (check DB if all have it already)
       const lastCandle = candles[candles.length - 1];
 
       const threshold_8 = (wma8 * 0.005) <= Math.abs(wma8 - candleAvg);
@@ -111,40 +112,42 @@ class MainStrategy {
 
       // Buy strategy
       if (!buyPrice && buyCondition) {
-        this.mainLogger.buy({ asset, price });
-        this.letterMan.setBuyPrice({ pair, buyPrice: price, buyTime: time });
+        this.mainLogger.buy({ asset, price, candleAvg, wma8, wma4, threshold_8 });
+        this.letterMan.setBuyPrice({ pair, buyPrice: price, buyTime: time, lowerBand: (buyPrice * (1 + this.triggerLoBand)) });
         this.scheduleFrameUpdate({ pair, buyTime, lastCandle });
         this.includeBests({ pair, reset: true });
         return;
       }
 
-      // TODO add sell strategy for profit and leave this one for stop loss
       // Sell strategy
       if (buyPrice) {
         this.includeBests({ pair });
 
         // Take profit
-        // TODO test with lowerBand of 1% and 0.5% (when candles are separated)
+        // TODO 5 test with lowerBand of 1% and 0.5% (when candles are separated)
         if (!buyCondition) {
           console.log(asset, 'candleAvg', candleAvg);
           console.log(asset, 'buyPrice', buyPrice);
-          const profit = candleAvg / buyPrice;
-          const lowerBand = price / bestSell;
-          console.log(asset, 'lowerBand', lowerBand);
+          const profit = (price - buyPrice) / buyPrice;
+          const diffHigh = (price - bestSell) / bestSell;
+          console.log(asset, 'diffHigh', diffHigh);
+          console.log(asset, 'profit', profit);
           if (profit > 0.01
             && profit < this.triggerLoBand
-            && lowerBand <= bestSell * 0.99 // High (bestSell) cannot be 1% greater than Current
+            && diffHigh > 0.01 // High (bestSell) cannot be 1% greater than Current
             && (time - bestSellTime) < 120000
           ) {
-            this.sold({ pair, asset, price, takeProfit: true, takeProfitLevel: '< 0.02', bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4 });
+            this.sold({ pair, asset, price, takeProfit: true, lowerBand: '< 0.02', bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4, fee: this.fee });
           } else if (profit >= this.triggerLoBand) {
-            let currentLowerBand = lastLowerBand;
-            if (lowerBand > lastLowerBand) {
-              this.letterMan.setLowerBand({ pair, lowerBand });
-              currentLowerBand = lowerBand;
+            const curentLowerBand = price * 0.99;
+            // TODO remove this default for lowerBand, it is already set when buying (check DB if all have it already)
+            let thisLowerBand = lowerBand || (buyPrice * (1 + this.triggerLoBand));
+            if (curentLowerBand > lowerBand) {
+              this.letterMan.setLowerBand({ pair, lowerBand: thisLowerBand });
+              thisLowerBand = curentLowerBand;
             }
-            if (price <= currentLowerBand) {
-              this.sold({ pair, asset, price, takeProfit: true, takeProfitLevel: currentLowerBand.toFixed(2), bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4 });
+            if (price <= thisLowerBand) {
+              this.sold({ pair, asset, price, takeProfit: true, lowerBand: thisLowerBand.toFixed(2), bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4, fee: this.fee });
             }
           }
           return;
@@ -157,7 +160,7 @@ class MainStrategy {
           frameCount && ((price / buyPrice) > (frameCount / 100))
             ? withThreshold_4 : withThreshold_8;
         if (sellCondition) {
-          this.sold({ pair, asset, price, withThreshold_4, bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4 });
+          this.sold({ pair, asset, price, withThreshold_4, bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4, fee: this.fee });
         }
       }
     });

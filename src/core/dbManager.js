@@ -11,7 +11,7 @@ const backupsPath = path.resolve(process.cwd(), 'src/db/backups');
 const ordersDBPath = path.resolve(process.cwd(), 'src/db/orders.json');
 const assetsDBPath = path.resolve(process.cwd(), 'src/db/assets.json');
 
-// TODO fallback to bkp, then delete the old backup if the latest works
+// TODO 2 fallback to bkp, then delete the old backup if the latest works
 if (!fs.existsSync(ordersDBPath)) fs.writeFileSync(ordersDBPath, '{}');
 if (!fs.existsSync(assetsDBPath)) fs.writeFileSync(assetsDBPath, '{}');
 

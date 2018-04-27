@@ -40,8 +40,8 @@ function init() {
     }
   }
 
-  // TODO get pairs status (ON/OFF)
-  // TODO fix error, to many requests is throwing uncaught exception (bug on ticker, sending a lot at once)
+  // TODO 4 get pairs status (ON/OFF)
+  // TODO 3 fix error, to many requests is throwing uncaught exception (bug on ticker, sending a lot at once)
   // coinman: gracefulExit Unhandled Rejection -> Promise: Error: 429: Too Many Requests: retry after 4
   // coinman: gracefulExit  Promise {
   //   <rejected> {Error: 429: Too Many Requests: retry after 4

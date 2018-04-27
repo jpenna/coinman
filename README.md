@@ -55,3 +55,11 @@
   }
 }
 ```
+
+## TODO flags
+
+1: Needed for testing here
+2: Needed for server deploy
+3: Important improvement
+4: Minor improvement
+5: Strategy

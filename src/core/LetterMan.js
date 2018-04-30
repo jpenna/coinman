@@ -45,11 +45,13 @@ class LetterMan {
   }
 
   setBuyPrice({ pair, buyPrice, buyTime, lowerBand }) {
+    console.log('setBuyPrice', pair, lowerBand);
     this.dataKeeper.updateProperty(pair, { buyPrice, buyTime, lowerBand });
     this.dbManager.updateAssetsProperty(pair, { buyPrice, buyTime, lowerBand });
   }
 
   setLowerBand({ pair, lowerBand }) {
+    console.log('setlowerband', pair, lowerBand);
     this.dataKeeper.updateProperty(pair, { lowerBand });
     this.dbManager.updateAssetsProperty(pair, { lowerBand });
   }

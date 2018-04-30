@@ -1,4 +1,5 @@
 const binanceApi = require('binance');
+const WebSocket = require('ws');
 const coreLog = require('debug')('coinman:core');
 const errorLog = require('debug')('coinman:coreError');
 const bnbLog = require('debug')('coinman:binance');
@@ -6,6 +7,36 @@ const bnbLog = require('debug')('coinman:binance');
 bnbLog.log = console.error.bind(console); // eslint-disable-line no-console
 
 module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
+  handleCandle(data) {
+    const { E: time, k: { s: pair, o, c, h, l, q: quoteVolume, x: isOver, T: closeTime } } = data;
+    letterMan.receivedBinanceCandle({ time, pair, o, c, h, l, quoteVolume, isOver, closeTime });
+  },
+
+  wsRetries: 0,
+
+  fromCollector() {
+    const ws = new WebSocket(`ws://localhost:${process.env.COLLECTOR_WS_PORT}`);
+
+    ws.on('error', err => errorLog('Error connecting WS: ', err));
+
+    ws.on('open', () => {
+      coreLog('Collector connected');
+      this.wsRetries = 0;
+    });
+
+    ws.on('close', () => {
+      coreLog(`WS disconnected! Retrying connection in ${this.wsRetries} seconds.`);
+      setTimeout(() => {
+        if (this.wsRetries < 5) this.wsRetries++;
+        this.fromCollector();
+      }, this.wsRetries * 1000);
+    });
+
+    ws.on('message', function onMessage(data) {
+      this.handleCandle(JSON.parse(data));
+    }.bind(this));
+  },
+
   binanceWS(binanceRest) {
     coreLog('Initializing Binance WS');
     const bnbWS = new binanceApi.BinanceWS(beautify);
@@ -33,7 +64,7 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
 
     const cancelBot = setTimeout(() => {
       bnbLog('Timeout. All websockets did not connect on time (2 min)');
-      process.emit('SIGINT');
+      process.quit();
     }, 120000);
 
     const startConn = Date.now();
@@ -41,9 +72,9 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
 
     bnbWS.onCombinedStream(
       candleStreams,
-      ({ data }) => {
+      function onCandle({ data }) {
         // TODO 2 use time to check if the candle is over in case of websocket failure
-        const { E: time, k: { s: pair, o, c, h, l, q: quoteVolume, x: isOver, T: closeTime } } = data;
+        const { k: { s: pair } } = data;
 
         if (!connectedPairs[pair]) {
           connectedCount++;
@@ -58,8 +89,8 @@ module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
 
         if (!allConnected) return;
 
-        letterMan.receivedBinanceCandle({ time, pair, o, c, h, l, quoteVolume, isOver, closeTime });
-      },
+        this.handleCandle(data);
+      }.bind(this),
     );
 
     // TODO 4 try to get all names

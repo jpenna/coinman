@@ -1,5 +1,5 @@
 const debug = require('debug')('coinman:fetcher');
-const errorsLog = require('simple-node-logger').createSimpleLogger('logs/errors.log');
+const errorsLog = require('simple-node-logger').createSimpleFileLogger('logs/errors.log');
 
 const fs = require('fs');
 

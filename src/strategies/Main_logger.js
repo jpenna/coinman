@@ -3,7 +3,7 @@
 const utils = require('../tools/utils');
 const debug = require('debug')('coinman:strategyMain');
 
-const log = require('simple-node-logger').createSimpleLogger('logs/orders.log');
+const log = require('simple-node-logger').createSimpleFileLogger('logs/orders.log');
 
 log.setLevel('all');
 
@@ -21,9 +21,10 @@ class MainLogger {
     const { prettySatoshiPercent } = utils;
 
     this.sendMessage(`
-📌 ${pair}
+📌 ${(new Date()).toLocaleString()}
+${pair}
 *Buy Price: ${buyPrice.toFixed(8)}*
-Lower Band: ${lowerBand} (${prettySatoshiPercent(lowerBand, buyPrice)}%)
+Lower Band: ${lowerBand.toFixed(8)} (${prettySatoshiPercent(lowerBand, buyPrice)}%)
 Open: ${open} (${prettySatoshiPercent(open, buyPrice)}%)
 High: ${high} (${prettySatoshiPercent(high, buyPrice)}%)
 Low: ${low} (${prettySatoshiPercent(low, buyPrice)}%)

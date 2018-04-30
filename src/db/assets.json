@@ -3,156 +3,100 @@
     "asset": "BNB",
     "base": "BTC",
     "trust": 1,
-    "on": true,
-    "buyPrice": 0,
-    "buyTime": 0,
-    "bestBuy": 0.0015814,
-    "bestBuyTime": 1524794105331,
-    "bestSell": 0.0015978,
-    "bestSellTime": 1524793478926,
-    "lowerBand": 0
+    "on": true
   },
   "XLMBTC": {
     "asset": "XLM",
     "base": "BTC",
     "trust": 1,
-    "on": true,
-    "buyPrice": 0.00004229,
-    "buyTime": 1524789720137,
-    "bestSell": 0.00004588,
-    "bestSellTime": 1524798244270,
-    "bestBuy": 0.00004134,
-    "bestBuyTime": 1524789720137,
-    "lowerBand": 0.00004186
+    "on": true
   },
   "XVGBTC": {
     "asset": "XVG",
     "base": "BTC",
     "trust": 1,
-    "on": true,
-    "buyPrice": 0.00000767,
-    "buyTime": 1524796205412,
-    "bestSell": 0.00000788,
-    "bestSellTime": 1524802628946,
-    "bestBuy": 0.00000765,
-    "bestBuyTime": 1524796759551,
-    "lowerBand": 0.00000759
+    "on": true
   },
   "TRXBTC": {
     "asset": "TRX",
     "base": "BTC",
     "trust": 1,
-    "on": true,
-    "buyPrice": 0,
-    "buyTime": 0,
-    "bestSell": 0.00000809,
-    "bestSellTime": 1524787438215,
-    "bestBuy": 0.00000793,
-    "bestBuyTime": 1524787259520,
-    "lowerBand": 0
+    "on": true
   },
   "ETHBTC": {
     "asset": "ETH",
     "base": "BTC",
     "trust": 1,
     "on": true,
-    "buyPrice": 0,
-    "buyTime": 0,
-    "lowerBand": 0,
-    "bestBuy": 0.071436,
-    "bestBuyTime": 1524786594382,
-    "bestSell": 0.07158,
-    "bestSellTime": 1524786594382
+    "buyPrice": 0.07466,
+    "buyTime": 1525080600000,
+    "lowerBand": 0.0757799,
+    "bestBuy": 0.074419,
+    "bestBuyTime": 1525080600000,
+    "bestSell": 0.075118,
+    "bestSellTime": 1525080600000
   },
   "QTUMBTC": {
     "asset": "QTUM",
     "base": "BTC",
     "trust": 1,
     "on": true,
-    "buyPrice": 0,
-    "buyTime": 0,
-    "bestSell": 0.002278,
-    "bestSellTime": 1524785634501,
-    "bestBuy": 0.002255,
-    "bestBuyTime": 1524786631735,
-    "lowerBand": 0
+    "buyPrice": 0.002559,
+    "buyTime": 1525080600000,
+    "lowerBand": 0.002597385,
+    "bestBuy": 0.002504,
+    "bestBuyTime": 1525080600000,
+    "bestSell": 0.002602,
+    "bestSellTime": 1525080600000
   },
   "ADABTC": {
     "asset": "ADA",
     "base": "BTC",
     "trust": 1,
     "on": true,
-    "buyPrice": 0,
-    "buyTime": 0,
-    "bestSell": 0.00003168,
-    "bestSellTime": 1524787556437,
-    "bestBuy": 0.00003158,
-    "bestBuyTime": 1524787556437,
-    "lowerBand": 0
+    "buyPrice": 0.00003767,
+    "buyTime": 1525080600000,
+    "lowerBand": 0.00003823504999999999,
+    "bestBuy": 0.00003714,
+    "bestBuyTime": 1525080600000,
+    "bestSell": 0.00003785,
+    "bestSellTime": 1525080600000
   },
   "LUNBTC": {
     "asset": "LUN",
     "base": "BTC",
     "trust": 1,
-    "on": true,
-    "buyPrice": 0.0014227,
-    "buyTime": 1524799916798,
-    "bestSell": 0.0014387,
-    "bestSellTime": 1524803400000,
-    "bestBuy": 0.0014127,
-    "bestBuyTime": 1524801902267,
-    "lowerBand": 0.00140847
+    "on": true
   },
   "ARKBTC": {
     "asset": "ARK",
     "base": "BTC",
     "trust": 1,
-    "on": true,
-    "buyPrice": 0,
-    "buyTime": 0,
-    "bestSell": 0.000387,
-    "bestSellTime": 1524759087432,
-    "bestBuy": 0.000364,
-    "bestBuyTime": 1524742200000,
-    "lowerBand": 0
+    "on": true
   },
   "LSKBTC": {
     "asset": "LSK",
     "base": "BTC",
     "trust": 1,
-    "on": true,
-    "buyPrice": 0,
-    "buyTime": 0,
-    "bestSell": 0.0012686,
-    "bestSellTime": 1524788034406,
-    "bestBuy": 0.0012617,
-    "bestBuyTime": 1524789607011,
-    "lowerBand": 0
+    "on": true
   },
   "ZRXBTC": {
     "asset": "ZRX",
     "base": "BTC",
     "trust": 1,
-    "on": true,
-    "buyPrice": 0,
-    "buyTime": 0,
-    "bestSell": 0.0001257,
-    "bestSellTime": 1524794249000,
-    "bestBuy": 0.00012304,
-    "bestBuyTime": 1524787311722,
-    "lowerBand": 0
+    "on": true
   },
   "XRPBTC": {
     "asset": "XRP",
     "base": "BTC",
     "trust": 1,
     "on": true,
-    "buyPrice": 0,
-    "buyTime": 0,
-    "bestSell": 0.000093,
-    "bestSellTime": 1524761586294,
-    "bestBuy": 0.00008972,
-    "bestBuyTime": 1524743295466,
-    "lowerBand": 0
+    "buyPrice": 0.00009134,
+    "buyTime": 1525082400000,
+    "lowerBand": 0.00009271009999999999,
+    "bestBuy": 0.00009096,
+    "bestBuyTime": 1525082400000,
+    "bestSell": 0.00009145,
+    "bestSellTime": 1525082400000
   }
 }

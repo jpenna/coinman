@@ -1,4 +1,4 @@
-const errorsLog = require('simple-node-logger').createSimpleLogger('logs/errors.log');
+const errorsLog = require('simple-node-logger').createSimpleFileLogger('logs/errors.log');
 const debugError = require('debug')('coinman:gracefulExit');
 
 const codeMap = new Map([
@@ -8,7 +8,8 @@ const codeMap = new Map([
   [4, 'SIGUSR1'],
   [5, 'SIGUSR2'],
   [100, 'Error on Graceful Exit Process'],
-  [101, 'Init (Binance REST) Max tries reached'],
+  [101, 'Programmatically quiting'],
+  [102, 'Init (Binance REST) Max tries reached'],
 ]);
 
 const skipCleanup = Symbol('skipCleanup');
@@ -48,6 +49,8 @@ function setup({ sendMessage }) {
     errorsLog.info(errorMsg);
     debugError(errorMsg);
   });
+
+  process.on('quit', code => process.emit('cleanup', code || 101));
 
   process.on('cleanup', (code) => {
     if (process[skipCleanup]) return debugError('CLEANUP WAS CALLED AGAIN!!! There is some error leaking in the cleanup process.');

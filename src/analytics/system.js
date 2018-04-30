@@ -1,5 +1,5 @@
 const os = require('os');
-const log = require('simple-node-logger').createSimpleLogger('logs/system.log');
+const log = require('simple-node-logger').createSimpleFileLogger('logs/system.log');
 
 module.exports = {
   monitorSystem() {

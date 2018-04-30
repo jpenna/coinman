@@ -1,0 +1,23 @@
+// Reset DB if there is a problem loading DB
+
+let ordersDB;
+let assetsDB;
+try {
+  ordersDB = require(ordersDBPath); // eslint-disable-line
+} catch (e) {
+  console.log('Missing Orders DB');
+  ordersDB = {};
+}
+try {
+  assetsDB = require(assetsDBPath); // eslint-disable-line
+} catch (e) {
+  console.log('Missing Assets DB');
+  assetsDB = {
+    BNBBTC: {
+      asset: 'BNB',
+      base: 'BTC',
+      trust: 1,
+      on: true,
+    },
+  };
+}

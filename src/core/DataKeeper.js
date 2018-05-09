@@ -1,8 +1,30 @@
 const MainStrategy = require('../strategies/Main');
 
 class DataKeeper {
-  setupProperty({ pair, data }) {
+  constructor() {
+    this.advices = {
+      buyPairs: new Map(), // pair: advice { priority, price }
+      sellPairs: new Map(),
+    };
+    this.account = {
+      config: {
+        minBTC: 0.01,
+        maxBTC: 0.1,
+      },
+      balance: {}, // { BTC: ..., ETH: ... } volume
+    };
+    this.operations = {};
+    this.orders = {};
+  }
+
+  setupPair({ pair, data }) {
     this[pair] = data;
+    this.operations[pair] = {}; // { countLimit, ongoingOrder }
+    this.orders[pair] = []; // [{ orderId, volume, price, type }]
+  }
+
+  setupBalance(balance) {
+    this.account.balance = balance;
   }
 
   updateMainStrategyValues({ time, pair, o, c, h, l, quoteVolume, isOver, closeTime }) {
@@ -39,8 +61,13 @@ class DataKeeper {
     Object.assign(this[property], data);
   }
 
-  newOrderId() {
+  addNewOrder({ orderId, pair, volume, price, type }) {
+    this.orders[pair].push({ orderId, pair, volume, price, type });
+  }
 
+  cancelOrder({ orderId, pair }) {
+    const index = this.orders[pair].findIndex(v => v.orderId === orderId);
+    this.orders.splice(index, 1);
   }
 }
 

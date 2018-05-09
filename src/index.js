@@ -33,7 +33,7 @@ const bnbRest = binance.binanceRest();
 
 const init = fetcher({ binanceRest: bnbRest, pairs, sendMessage, letterMan });
 
-const broker = new Broker({ binanceRest: bnbRest, sendMessage });
+const broker = new Broker({ binanceRest: bnbRest, sendMessage, dataKeeper });
 
 const mainStrategy = new MainStrategy({ dataKeeper, broker, letterMan, sendMessage });
 
@@ -47,17 +47,22 @@ async function startBot() {
   let data;
 
   try {
-    data = JSON.parse(fs.readFileSync('src/BNB_rest.json'));
-    // data = await init.fetchInitialData();
-    // fs.writeFile('src/rest', JSON.stringify(data));
+    data = await init.fetchInitialData();
+    data = [];
+    data.push(JSON.parse(fs.readFileSync('src/balance.json')));
+    data.push(JSON.parse(fs.readFileSync('src/BNB_rest.json')));
   } catch (e) {
     errorLog('Error fetching initial data. Retrying.', e);
     retries++;
     return startBot();
   }
 
-  data.forEach((d, index) => {
-    dataKeeper.setupProperty({
+  const [balance, ...klines] = data;
+
+  dataKeeper.setupBalance(balance);
+
+  klines.forEach((d, index) => {
+    dataKeeper.setupPair({
       pair: pairs[index],
       data: {
         ...dbManager.assetsDB[pairs[index]],

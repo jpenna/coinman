@@ -38,6 +38,10 @@ class DataKeeper {
   updateProperty(property, data) {
     Object.assign(this[property], data);
   }
+
+  newOrderId() {
+
+  }
 }
 
 module.exports = DataKeeper;

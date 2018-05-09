@@ -14,5 +14,7 @@ module.exports = {
     }],
     "no-plusplus": 0,
     "prefer-arrow-callback": 0,
+    "no-restricted-syntax": 0,
+    "no-param-reassign": 0,
   }
 };

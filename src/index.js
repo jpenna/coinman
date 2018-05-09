@@ -66,6 +66,7 @@ async function startBot() {
     });
   });
 
+  // TODO getting all data from collector
   let connectedPairs = [true];
   if (true) {
     binance.fromCollector();

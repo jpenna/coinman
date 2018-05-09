@@ -7,12 +7,14 @@ class Broker {
     this.binanceRest = binanceRest;
     this.sendMessage = sendMessage;
     this.dataKeeper = dataKeeper;
+
+    this.tickers = dataKeeper.tickers; // {}
     this.orders = dataKeeper.orders; // {}
     this.operations = dataKeeper.operations; // {}
     this.balance = dataKeeper.account.balance; // {}
     this.config = dataKeeper.account.config; // {}
-    this.buyPairs = dataKeeper.advices.buyPairs; // Map
-    this.sellPairs = dataKeeper.advices.sellPairs; // Map
+    this.advices = dataKeeper.advices; // Map
+
     this.start();
   }
 
@@ -23,38 +25,40 @@ class Broker {
   }
 
   run() {
-    if (this.sellPairs.size) this.handleSell();
-    if (this.buyPairs.size) this.handleBuys();
-  }
-
-  handleSell() {
-    this.sellPairs.forEach(async (advice, pair) => {
-      const { [pair.slice(0, 3)]: pairBalance } = this.balance;
-      if (!pairBalance || !pairBalance.free) {
-        return fileLog(`SELL No pair balance or free ${pair.slice(0, 3)}`);
-      }
-
-      const { price: priceAdvice } = advice;
-      const { countLimit } = this.operations[pair];
-      const { [pair]: [pairOrder] } = this.orders;
-
-      if (pairOrder.type === 'limit' && pairOrder.volume < 0 && countLimit < 3) {
-        this.operations[pair].countLimit++;
-      } else {
-        const cancelSuccess = await this.cancelOrder(pairOrder.orderId);
-        // TODO what if cancel ID dont exist?
-        if (!cancelSuccess) return;
-        this.sendMarket({ pair, volume: pairBalance.free });
-        this.operations[pair].countLimit = 0;
-        return;
-      }
-
-      this.sendLimit({ pair, price: priceAdvice, volume: pairBalance.free });
+    const buyPairs = new Map();
+    this.advices.forEach((advice, pair) => {
+      if (advice.buy) return buyPairs.set(pair, advice);
+      this.handleSell(pair, advice);
     });
+    if (buyPairs.size) this.handleBuy(buyPairs);
   }
 
-  handleBuy() {
-    const buySet = this.selectBuys();
+  async handleSell(pair, advice) {
+    const { [pair.slice(0, 3)]: pairBalance } = this.balance;
+    if (!pairBalance || !pairBalance.free) {
+      return fileLog(`SELL No pair balance or free ${pair.slice(0, 3)}`);
+    }
+
+    const { price: priceAdvice } = advice;
+    const { countLimit } = this.operations[pair];
+    const { [pair]: [pairOrder] } = this.orders;
+
+    if (pairOrder.type === 'limit' && pairOrder.volume < 0 && countLimit < 3) {
+      this.operations[pair].countLimit++;
+    } else {
+      const cancelSuccess = await this.cancelOrder(pairOrder.orderId);
+      // TODO what if cancel ID dont exist?
+      if (!cancelSuccess) return;
+      this.sendMarket({ pair, volume: pairBalance.free });
+      this.operations[pair].countLimit = 0;
+      return;
+    }
+
+    this.sendLimit({ pair, price: priceAdvice, volume: pairBalance.free });
+  }
+
+  handleBuy(buyPairs) {
+    const buySet = this.selectBuys(buyPairs);
 
     buySet.forEach(async (advice, pair) => {
       const { price: priceAdvice } = advice;
@@ -82,8 +86,8 @@ class Broker {
     });
   }
 
-  selectBuys() {
-    const buySize = this.buyPairs.size;
+  selectBuys(buyPairs) {
+    const buySize = buyPairs.size;
 
     // TODO if already ordered, dont do anything (check balance of asset)
     const { minBTC, maxBTC } = this.config;
@@ -100,8 +104,8 @@ class Broker {
         selected.set(k, wv);
       }
     } else {
-      const array = Array.from(this.buyPairs);
-      const prioritySorted = array.sort(([, advice]) => -advice.priority);
+      const array = Array.from(this.tickers);
+      const prioritySorted = array.sort(([, ticker]) => -ticker.priority);
 
       prioritySorted.length = maxQty;
 

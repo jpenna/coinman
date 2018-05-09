@@ -44,8 +44,6 @@ Threshold (${threshold_8}) | 0.5% = ${wma8 * 0.005} | diff = ${Math.abs(wma8 - c
   }
 
   sell({ asset, price, withThreshold_4, takeProfit, lowerBand, bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4, fee }) {
-    console.log(asset, 'price', price);
-    console.log(asset, 'buyPrice', buyPrice);
     const text1 = `(S) ${asset}: ${price.toFixed(8)} BTC
 Profit: ${(((price - buyPrice) / buyPrice) - fee).toFixed(3)}%${withThreshold_4 ? ' (using threshold 4)' : ''}
 BuyPrice: ${buyPrice.toFixed(8)}`;

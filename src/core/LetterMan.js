@@ -9,12 +9,14 @@ class LetterMan {
     this.runningSet = new Set();
     process.on('cleanup', LetterMan.cleanupModule.bind(this));
 
+    this.advices = this.dataKeeper.advices;
+
     setTimeout(this.resetRunningSet.bind(this), 180000);
   }
 
   resetRunningSet() {
     const runningFor = `(${((Date.now() - this.startTime) / 60000).toFixed(0)} minutes)`;
-    const pairs = Object.keys(this.dataKeeper);
+    const pairs = Object.keys(this.dataKeeper.tickers);
     if (this.runningSet.size !== pairs.length) {
       const missing = pairs.filter(k => !this.runningSet.has(k));
       const msg = `Not all assets are running (${missing.length}): ${missing} ${runningFor}`;
@@ -46,25 +48,39 @@ class LetterMan {
 
   setBuyPrice({ pair, buyPrice, buyTime, lowerBand }) {
     console.log('setBuyPrice', pair, lowerBand);
-    this.dataKeeper.updateProperty(pair, { buyPrice, buyTime, lowerBand });
+    this.dataKeeper.updateTicker(pair, { buyPrice, buyTime, lowerBand });
     this.dbManager.updateAssetsProperty(pair, { buyPrice, buyTime, lowerBand });
   }
 
   setLowerBand({ pair, lowerBand }) {
     console.log('setlowerband', pair, lowerBand);
-    this.dataKeeper.updateProperty(pair, { lowerBand });
+    this.dataKeeper.updateTicker(pair, { lowerBand });
     this.dbManager.updateAssetsProperty(pair, { lowerBand });
   }
 
   updateFrameCount({ pair, increment }) {
-    const frameCount = increment ? (this.dataKeeper[pair].frameCount || 0) + increment : 0;
-    this.dataKeeper.updateProperty(pair, { frameCount });
+    const frameCount = increment ? (this.dataKeeper.tickers[pair].frameCount || 0) + increment : 0;
+    this.dataKeeper.updateTicker(pair, { frameCount });
   }
 
   setWithTimeAssets({ pair, name, value, time }) {
     const now = time || Date.now();
-    this.dataKeeper.updateProperty(pair, { [name]: value, [`${name}Time`]: now });
+    this.dataKeeper.updateTicker(pair, { [name]: value, [`${name}Time`]: now });
     this.dbManager.updateAssetsProperty(pair, { [name]: value, [`${name}Time`]: now });
+  }
+
+  orderBuy({ pair, buyPrice, buyTime, lowerBand }) {
+    this.setBuyPrice({ pair, buyPrice, buyTime, lowerBand });
+    this.advices.set(pair, { buy: true, price: buyPrice });
+  }
+
+  orderSell({ pair }) {
+    this.setBuyPrice({ pair, buyPrice: 0, buyTime: 0, lowerBand: 0 });
+    this.advices.set(pair, { buy: false, price: 0 });
+  }
+
+  noOrder({ pair }) {
+    this.advices.delete(pair);
   }
 }
 

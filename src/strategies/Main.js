@@ -6,12 +6,13 @@ const MainLogger = require('./Main_logger');
 
 class MainStrategy {
   constructor({ dataKeeper, dispatcher, letterMan, sendMessage }) {
-    this.dataKeeper = dataKeeper;
     this.dispatcher = dispatcher;
     this.letterMan = letterMan;
     this.schedule = {};
     this.sendMessage = sendMessage;
     this.mainLogger = new MainLogger({ sendMessage });
+
+    this.tickers = dataKeeper.tickers;
 
     this.triggerLoBand = 0.015;
     this.interval = 5000;
@@ -29,8 +30,8 @@ class MainStrategy {
   init() {
     clearTimeout(this.runTimeout);
 
-    Object.keys(this.dataKeeper).forEach((pair) => {
-      const { buyTime, candles } = this.dataKeeper[pair];
+    Object.keys(this.tickers).forEach((pair) => {
+      const { buyTime, candles } = this.tickers[pair];
       if (!buyTime) return;
       const lastCandle = candles[candles.length - 1];
       this.scheduleFrameUpdate({ pair, buyTime, lastCandle });
@@ -53,7 +54,7 @@ class MainStrategy {
     const timeout = rest > 0 ? rest : 0;
 
     const bindedUpdateFrame = function updateFrame() {
-      const { candles, buyPrice, lowerBand } = this.dataKeeper[pair];
+      const { candles, buyPrice, lowerBand } = this.tickers[pair];
       const [, open, high, low, close, volume] = candles[candles.length - 1];
       this.mainLogger.telegramTick({ pair, open, high, low, close, volume, buyPrice, lowerBand });
       this.letterMan.updateFrameCount({ pair, increment: 1 });
@@ -77,7 +78,7 @@ class MainStrategy {
   }
 
   includeBests({ pair, reset }) {
-    const { candles, bestSell, bestBuy } = this.dataKeeper[pair];
+    const { candles, bestSell, bestBuy } = this.tickers[pair];
     const [time, , high, low] = candles[candles.length - 1];
     if (reset) {
       this.letterMan.setWithTimeAssets({ pair, name: 'bestBuy', value: +low, time });
@@ -92,16 +93,16 @@ class MainStrategy {
     }
   }
 
-  sold(data) {
+  sell(data) {
     const { pair } = data;
-    this.letterMan.setBuyPrice({ pair, buyPrice: 0, buyTime: 0, lowerBand: 0 });
+    this.letterMan.orderSell({ pair });
     this.unscheduleFrameUpdate(pair);
     this.mainLogger.sell(data);
   }
 
   run() {
-    Object.keys(this.dataKeeper).forEach((pair) => {
-      const { asset, buyPrice, buyTime, bestSell, bestSellTime, bestBuy, bestBuyTime, frameCount, wma8, wma4, candleAvg, candles, lowerBand } = this.dataKeeper[pair];
+    Object.keys(this.tickers).forEach((pair) => {
+      const { asset, buyPrice, buyTime, bestSell, bestSellTime, bestBuy, bestBuyTime, frameCount, wma8, wma4, candleAvg, candles, lowerBand } = this.tickers[pair];
       const lastCandle = candles[candles.length - 1];
 
       const threshold_8 = (wma8 * 0.005) <= Math.abs(wma8 - candleAvg);
@@ -114,7 +115,8 @@ class MainStrategy {
       if (!buyPrice && buyCondition) {
         const buyLowerBand = price * (1 + this.triggerLoBand);
         this.mainLogger.buy({ asset, price, candleAvg, wma8, wma4, threshold_8 });
-        this.letterMan.setBuyPrice({ pair, buyPrice: price, buyTime: time, lowerBand: buyLowerBand });
+        this.letterMan.orderBuy({ pair, buyPrice: price, buyTime: time, lowerBand: buyLowerBand });
+
         this.scheduleFrameUpdate({ pair, buyTime, lastCandle });
         this.includeBests({ pair, reset: true });
         return;
@@ -138,7 +140,7 @@ class MainStrategy {
             && diffHigh > 0.01 // High (bestSell) cannot be 1% greater than Current
             && (time - bestSellTime) < 120000
           ) {
-            return this.sold({ pair, asset, price, takeProfit: true, lowerBand: '< 0.02', bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4, fee: this.fee });
+            return this.sell({ pair, asset, price, takeProfit: true, lowerBand: '< 0.02', bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4, fee: this.fee });
           } else if (profit >= this.triggerLoBand) {
             const curentLowerBand = price * 0.99;
             if (curentLowerBand > thisLowerBand) {
@@ -146,7 +148,7 @@ class MainStrategy {
               thisLowerBand = curentLowerBand;
             }
             if (price <= thisLowerBand) {
-              return this.sold({ pair, asset, price, takeProfit: true, lowerBand: thisLowerBand.toFixed(2), bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4, fee: this.fee });
+              return this.sell({ pair, asset, price, takeProfit: true, lowerBand: thisLowerBand.toFixed(2), bestSell, buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4, fee: this.fee });
             }
           }
         }
@@ -158,9 +160,11 @@ class MainStrategy {
           frameCount && ((price / buyPrice) > (frameCount / 100))
             ? withThreshold_4 : withThreshold_8;
         if (sellCondition) {
-          this.sold({ pair, asset, price, withThreshold_4, bestSell, lowerBand: thisLowerBand.toFixed(2), buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4, fee: this.fee });
+          return this.sell({ pair, asset, price, withThreshold_4, bestSell, lowerBand: thisLowerBand.toFixed(2), buyPrice, bestBuy, time, buyTime, bestSellTime, bestBuyTime, candleAvg, wma8, wma4, fee: this.fee });
         }
       }
+
+      this.letterMan.noOrder({ pair });
     });
     this.runTimeout = setTimeout(this.run.bind(this), this.interval);
   }

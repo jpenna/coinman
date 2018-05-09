@@ -2,10 +2,6 @@ const MainStrategy = require('../strategies/Main');
 
 class DataKeeper {
   constructor() {
-    this.advices = {
-      buyPairs: new Map(), // pair: advice { priority, price }
-      sellPairs: new Map(),
-    };
     this.account = {
       config: {
         minBTC: 0.01,
@@ -13,12 +9,14 @@ class DataKeeper {
       },
       balance: {}, // { BTC: ..., ETH: ... } volume
     };
-    this.operations = {};
-    this.orders = {};
+    this.advices = new Map(); // pair: advice { priority, price }
+    this.operations = Object.create(null);
+    this.orders = Object.create(null);
+    this.tickers = Object.create(null);
   }
 
   setupPair({ pair, data }) {
-    this[pair] = data;
+    this.tickers[pair] = data;
     this.operations[pair] = {}; // { countLimit, ongoingOrder }
     this.orders[pair] = []; // [{ orderId, volume, price, type }]
   }
@@ -28,7 +26,7 @@ class DataKeeper {
   }
 
   updateMainStrategyValues({ time, pair, o, c, h, l, quoteVolume, isOver, closeTime }) {
-    const { candles } = this[pair];
+    const { candles } = this.tickers[pair];
     const lastCandle = candles[candles.length - 1];
 
     let newCandles;
@@ -54,11 +52,11 @@ class DataKeeper {
     // TODO 2 improve this calculatation to use the updated values only, not redo everything
     const update = MainStrategy.processCandles(newCandles || candles);
 
-    this.updateProperty(pair, update);
+    this.updateTicker(pair, update);
   }
 
-  updateProperty(property, data) {
-    Object.assign(this[property], data);
+  updateTicker(pair, data) {
+    Object.assign(this.tickers[pair], data);
   }
 
   addNewOrder({ orderId, pair, volume, price, type }) {

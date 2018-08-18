@@ -3,8 +3,14 @@ const errorsLog = require('simple-node-logger').createSimpleFileLogger('logs/err
 
 const fs = require('fs');
 
-module.exports = ({ binanceRest, sendMessage }) => ({
+module.exports = ({ pairs, binanceRest, sendMessage }) => ({
   fetchInitialData() {
+    const klines = pairs.map(pair => binanceRest.klines({
+      symbol: pair,
+      limit: 8,
+      interval: '30m',
+    }));
+
     const balance = binanceRest.account()
       .then((data) => {
         const { balances, makerCommission, takerCommission, buyerCommission, sellerCommission } = data;
@@ -31,6 +37,6 @@ module.exports = ({ binanceRest, sendMessage }) => ({
         return balanceNorm;
       });
 
-    return Promise.all([balance]);
+    return Promise.all([balance, ...klines]);
   },
 });

@@ -30,11 +30,10 @@ const { sendMessage } = spokesman;
 
 const dataKeeper = new DataKeeper();
 
-
 const postman = new Postman({ dataKeeper });
-const listener = new Listener();
+const listener = new Listener({ pairs, postman });
 
-const { fetchInitialData } = fetcher({ binanceRest, sendMessage });
+const { fetchInitialData } = fetcher({ pairs, binanceRest, sendMessage });
 
 const broker = new Broker({ binanceRest, sendMessage, dataKeeper });
 
@@ -59,19 +58,18 @@ let interval = 1000;
     return;
   }
 
-  const [balance] = data;
+  const [balance, klines] = data;
 
   dataKeeper.setupBalance(balance);
 
-  // klines.forEach((d, index) => {
-  //   dataKeeper.setupPair({
-  //     pair: pairs[index],
-  //     data: {
-  //       ...dbManager.assetsDB[pairs[index]],
-  //       ...MainStrategy.processCandles(d),
-  //     },
-  //   });
-  // });
+  klines.forEach((d, index) => {
+    dataKeeper.setupPair({
+      pair: pairs[index],
+      data: {
+        ...MainStrategy.processCandles(d),
+      },
+    });
+  });
 
   (function isComplete() {
     const start = pairs.every(pair => dataKeeper.tickers.includes(pair));

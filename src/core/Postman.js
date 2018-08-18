@@ -25,6 +25,8 @@ class Postman {
   // }
 
 
+
+
   receivedBinanceKline(data) {
     this.dataKeeper.updateMainStrategyValues(data);
   }

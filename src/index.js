@@ -10,10 +10,12 @@ const {
   fetcher,
   LetterMan,
 } = require('./core');
+
 const MainStrategy = require('./strategies/Main');
 const binanceApi = require('./exchanges/binance');
 const system = require('./analytics/system');
 const { setup: setupGracefulExit } = require('./tools/gracefulExit');
+
 
 debugSystem(`Initializing Bot at PID ${process.pid}`);
 

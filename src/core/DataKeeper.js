@@ -1,5 +1,6 @@
 const MainStrategy = require('../strategies/Main');
 
+// This whole class is set only for 1 exchange (Binance, in the case)
 class DataKeeper {
   constructor() {
     this.account = {
@@ -7,6 +8,7 @@ class DataKeeper {
         minBTC: 0.01,
         maxBTC: 0.1,
       },
+      // Binance balance
       balance: {}, // { BTC: ..., ETH: ... } volume
     };
     this.advices = new Map(); // pair: advice { priority, price }

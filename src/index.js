@@ -1,10 +1,9 @@
 const errorLog = require('debug')('coinman:core');
 const debugSystem = require('debug')('coinman:system');
-const fs = require('fs');
+// const fs = require('fs');
 
 const {
   Spokesman,
-  dbManager,
   Broker,
   DataKeeper,
   fetcher,
@@ -16,83 +15,67 @@ const {
 // system.monitorSystem();
 
 const MainStrategy = require('./strategies/Main');
-const Binance = require('./exchanges/Binance');
-const { setup: setupGracefulExit } = require('./tools/gracefulExit');
+const { binanceRest } = require('./exchanges/binance');
+// const { extraInfoSymbol } = require('./tools/gracefulExit');
+require('./tools/gracefulExit');
 
 debugSystem(`Initializing Bot at PID ${process.pid}`);
 
+// const pairs = ['BNBBTC', 'XLMBTC', 'XVGBTC', 'TRXBTC', 'ETHBTC', 'QTUMBTC', 'ADABTC', 'LUNBTC', 'ARKBTC', 'LSKBTC', 'ZRXBTC', 'XRPBTC'];
+// const pairs = ['ETHBTC', 'LUNBTC', 'XVGBTC', 'ARKBTC'];
+const pairs = ['ETHBTC'];
 
 const spokesman = new Spokesman();
 const { sendMessage } = spokesman;
 
 const dataKeeper = new DataKeeper();
-const { symbols: processSymbols } = setupGracefulExit({ sendMessage });
 
-const pairs = Object.keys(dbManager.assetsDB);
 
-const postman = new Postman({ dataKeeper, dbManager, skipedSymbol: processSymbols.postmanSkiped });
+const postman = new Postman({ dataKeeper });
 const listener = new Listener();
 
-const binance = new Binance();
-const bnbRest = binance.binanceRest();
+const { fetchInitialData } = fetcher({ binanceRest, sendMessage });
 
-const init = fetcher({ binanceRest: bnbRest, pairs, sendMessage, postman });
-
-const broker = new Broker({ binanceRest: bnbRest, sendMessage, dataKeeper });
+const broker = new Broker({ binanceRest, sendMessage, dataKeeper });
 
 const mainStrategy = new MainStrategy({ dataKeeper, broker, postman, sendMessage });
 
-let retries = 0;
+let interval = 1000;
 
-async function startBot() {
-  if (retries >= 3) {
-    errorLog(`Exiting. Maximum retries reachead (${retries})`);
-    return process.exit();
-  }
+(async function startBot() {
   let data;
 
   try {
-    data = await init.fetchInitialData();
-    data = [];
-    data.push(JSON.parse(fs.readFileSync('src/balance.json')));
-    data.push(JSON.parse(fs.readFileSync('src/BNB_rest.json')));
+    data = await fetchInitialData();
+    // data = [];
+    // data.push(JSON.parse(fs.readFileSync('src/balance.json')));
+    // data.push(JSON.parse(fs.readFileSync('src/BNB_rest.json')));
   } catch (e) {
     errorLog('Error fetching initial data. Retrying.', e);
-    retries++;
-    return startBot();
+    setTimeout(() => {
+      if (interval < 10000) interval += 1000;
+      startBot();
+    }, interval);
+    return;
   }
 
-  const [balance, ...klines] = data;
+  const [balance] = data;
 
   dataKeeper.setupBalance(balance);
 
-  klines.forEach((d, index) => {
-    dataKeeper.setupPair({
-      pair: pairs[index],
-      data: {
-        ...dbManager.assetsDB[pairs[index]],
-        ...MainStrategy.processCandles(d),
-      },
-    });
-  });
+  // klines.forEach((d, index) => {
+  //   dataKeeper.setupPair({
+  //     pair: pairs[index],
+  //     data: {
+  //       ...dbManager.assetsDB[pairs[index]],
+  //       ...MainStrategy.processCandles(d),
+  //     },
+  //   });
+  // });
 
-  // TODO getting all data from collector
-  let connectedPairs = [true];
-  if (true) {
-    binance.fromCollector();
-  } else {
-    connectedPairs = binance.binanceWS(bnbRest).connectedPairs; // eslint-disable-line
-  }
-
-  (function startCheck() {
-    let start;
-    Object.keys(connectedPairs).every((pair) => {
-      start = connectedPairs[pair];
-      return connectedPairs[pair];
-    });
-    if (!start) return setTimeout(startCheck, 500);
+  (function isComplete() {
+    const start = pairs.every(pair => dataKeeper.tickers.includes(pair));
+    if (!start) return setTimeout(isComplete, 500);
     mainStrategy.init();
   }());
-}
-
-startBot();
+}());

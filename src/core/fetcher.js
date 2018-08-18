@@ -25,7 +25,8 @@ module.exports = ({ binanceRest, sendMessage }) => ({
           return acc;
         }, {});
 
-        fs.writeFileSync('src/db/balance.json', JSON.stringify(balanceNorm, null, 2));
+        // Test
+        // fs.writeFileSync('src/db/balance.json', JSON.stringify(balanceNorm, null, 2));
 
         return balanceNorm;
       });

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const dbDebug = require('debug')('coinman:persist');
-const dbError = require('debug')('coinman:persist:error');
+const dbDebug = require('debug')('coinman:dbManager');
+const dbError = require('debug')('coinman:dbManager:error');
 
 const { gracefulExit } = require('../tools/gracefulExit');
 

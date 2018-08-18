@@ -8,7 +8,7 @@ const {
   Broker,
   DataKeeper,
   fetcher,
-  LetterMan,
+  Postman,
 } = require('./core');
 
 const MainStrategy = require('./strategies/Main');
@@ -29,15 +29,15 @@ const { symbols: processSymbols } = setupGracefulExit({ sendMessage });
 
 const pairs = Object.keys(dbManager.assetsDB);
 
-const letterMan = new LetterMan({ dataKeeper, dbManager, skipedSymbol: processSymbols.letterManSkiped });
-const binance = binanceApi({ beautify: false, sendMessage, pairs, letterMan });
+const postman = new Postman({ dataKeeper, dbManager, skipedSymbol: processSymbols.postmanSkiped });
+const binance = binanceApi({ beautify: false, sendMessage, pairs, postman });
 const bnbRest = binance.binanceRest();
 
-const init = fetcher({ binanceRest: bnbRest, pairs, sendMessage, letterMan });
+const init = fetcher({ binanceRest: bnbRest, pairs, sendMessage, postman });
 
 const broker = new Broker({ binanceRest: bnbRest, sendMessage, dataKeeper });
 
-const mainStrategy = new MainStrategy({ dataKeeper, broker, letterMan, sendMessage });
+const mainStrategy = new MainStrategy({ dataKeeper, broker, postman, sendMessage });
 
 let retries = 0;
 

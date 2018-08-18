@@ -5,9 +5,9 @@ const debugError = require('debug')('coinman:strategyMain:error');
 const MainLogger = require('./Main_logger');
 
 class MainStrategy {
-  constructor({ dataKeeper, dispatcher, letterMan, sendMessage }) {
+  constructor({ dataKeeper, dispatcher, postman, sendMessage }) {
     this.dispatcher = dispatcher;
-    this.letterMan = letterMan;
+    this.postman = postman;
     this.schedule = {};
     this.sendMessage = sendMessage;
     this.mainLogger = new MainLogger({ sendMessage });
@@ -48,7 +48,7 @@ class MainStrategy {
     const diffCloseCandle = lastCandle[6] - buyTime;
 
     const quotient = Math.floor(diffCloseCandle / 1800000); // 30min = 30 * 60 * 1000 = 1,800,000
-    if (quotient >= 1) this.letterMan.updateFrameCount({ pair, increment: quotient });
+    if (quotient >= 1) this.postman.updateFrameCount({ pair, increment: quotient });
 
     const rest = diffCloseCandle % 1800000;
     const timeout = rest > 0 ? rest : 0;
@@ -57,7 +57,7 @@ class MainStrategy {
       const { candles, buyPrice, lowerBand } = this.tickers[pair];
       const [, open, high, low, close, volume] = candles[candles.length - 1];
       this.mainLogger.telegramTick({ pair, open, high, low, close, volume, buyPrice, lowerBand });
-      this.letterMan.updateFrameCount({ pair, increment: 1 });
+      this.postman.updateFrameCount({ pair, increment: 1 });
     }.bind(this);
 
     this.schedule[pair] = setTimeout(() => {
@@ -74,28 +74,28 @@ class MainStrategy {
       debugError(`${pair} was not SCHEDULED. All SELL should have a schedule for frames.`);
     }
 
-    this.letterMan.updateFrameCount({ pair, increment: 0 });
+    this.postman.updateFrameCount({ pair, increment: 0 });
   }
 
   includeBests({ pair, reset }) {
     const { candles, bestSell, bestBuy } = this.tickers[pair];
     const [time, , high, low] = candles[candles.length - 1];
     if (reset) {
-      this.letterMan.setWithTimeAssets({ pair, name: 'bestBuy', value: +low, time });
-      this.letterMan.setWithTimeAssets({ pair, name: 'bestSell', value: +high, time });
+      this.postman.setWithTimeAssets({ pair, name: 'bestBuy', value: +low, time });
+      this.postman.setWithTimeAssets({ pair, name: 'bestSell', value: +high, time });
       return;
     }
     if (bestSell < high) {
-      this.letterMan.setWithTimeAssets({ pair, name: 'bestSell', value: +high, time });
+      this.postman.setWithTimeAssets({ pair, name: 'bestSell', value: +high, time });
     }
     if (low < bestBuy) {
-      this.letterMan.setWithTimeAssets({ pair, name: 'bestBuy', value: +low, time });
+      this.postman.setWithTimeAssets({ pair, name: 'bestBuy', value: +low, time });
     }
   }
 
   sell(data) {
     const { pair } = data;
-    this.letterMan.orderSell({ pair });
+    this.postman.orderSell({ pair });
     this.unscheduleFrameUpdate(pair);
     this.mainLogger.sell(data);
   }
@@ -115,7 +115,7 @@ class MainStrategy {
       if (!buyPrice && buyCondition) {
         const buyLowerBand = price * (1 + this.triggerLoBand);
         this.mainLogger.buy({ asset, price, candleAvg, wma8, wma4, threshold_8 });
-        this.letterMan.orderBuy({ pair, buyPrice: price, buyTime: time, lowerBand: buyLowerBand });
+        this.postman.orderBuy({ pair, buyPrice: price, buyTime: time, lowerBand: buyLowerBand });
 
         this.scheduleFrameUpdate({ pair, buyTime, lastCandle });
         this.includeBests({ pair, reset: true });
@@ -144,7 +144,7 @@ class MainStrategy {
           } else if (profit >= this.triggerLoBand) {
             const curentLowerBand = price * 0.99;
             if (curentLowerBand > thisLowerBand) {
-              this.letterMan.setLowerBand({ pair, lowerBand: thisLowerBand });
+              this.postman.setLowerBand({ pair, lowerBand: thisLowerBand });
               thisLowerBand = curentLowerBand;
             }
             if (price <= thisLowerBand) {
@@ -164,7 +164,7 @@ class MainStrategy {
         }
       }
 
-      this.letterMan.noOrder({ pair });
+      this.postman.noOrder({ pair });
     });
     this.runTimeout = setTimeout(this.run.bind(this), this.interval);
   }

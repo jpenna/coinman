@@ -6,10 +6,10 @@ const bnbLog = require('debug')('coinman:binance');
 
 bnbLog.log = console.error.bind(console); // eslint-disable-line no-console
 
-module.exports = ({ beautify = false, sendMessage, pairs, letterMan }) => ({
+module.exports = ({ beautify = false, sendMessage, pairs, postman }) => ({
   handleCandle(data) {
     const { E: time, k: { s: pair, o, c, h, l, q: quoteVolume, x: isOver, T: closeTime } } = data;
-    letterMan.receivedBinanceCandle({ time, pair, o, c, h, l, quoteVolume, isOver, closeTime });
+    postman.receivedBinanceCandle({ time, pair, o, c, h, l, quoteVolume, isOver, closeTime });
   },
 
   wsRetries: 0,

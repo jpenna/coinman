@@ -1,13 +1,13 @@
-const debugLog = require('debug')('coinman:LetterMan');
+const debugLog = require('debug')('coinman:Postman');
 
-class LetterMan {
+class Postman {
   constructor({ dataKeeper, dbManager, skipedSymbol }) {
     this.dataKeeper = dataKeeper;
     this.dbManager = dbManager;
     this.skipedSymbol = skipedSymbol;
     this.startTime = Date.now();
     this.runningSet = new Set();
-    process.on('cleanup', LetterMan.cleanupModule.bind(this));
+    process.on('cleanup', Postman.cleanupModule.bind(this));
 
     this.advices = this.dataKeeper.advices;
 
@@ -31,9 +31,9 @@ class LetterMan {
 
   static cleanupModule() {
     process[this.skipedSymbol] = {};
-    Object.getOwnPropertyNames(LetterMan.prototype).forEach((key) => {
-      if (key !== 'constructor' && typeof LetterMan.prototype[key] === 'function') {
-        LetterMan.prototype[key] = () => {
+    Object.getOwnPropertyNames(Postman.prototype).forEach((key) => {
+      if (key !== 'constructor' && typeof Postman.prototype[key] === 'function') {
+        Postman.prototype[key] = () => {
           // Count missed requests after system is flagged to shut down
           process[this.skipedSymbol][key] = (process[this.skipedSymbol].key || 0) + 1;
         };
@@ -84,4 +84,4 @@ class LetterMan {
   }
 }
 
-module.exports = LetterMan;
+module.exports = Postman;

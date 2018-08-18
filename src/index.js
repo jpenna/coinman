@@ -3,34 +3,37 @@ const debugSystem = require('debug')('coinman:system');
 const fs = require('fs');
 
 const {
-  telegram,
+  Spokesman,
   dbManager,
   Broker,
   DataKeeper,
   fetcher,
   Postman,
+  Listener,
 } = require('./core');
 
-const MainStrategy = require('./strategies/Main');
-const binanceApi = require('./exchanges/binance');
-const system = require('./analytics/system');
-const { setup: setupGracefulExit } = require('./tools/gracefulExit');
+// const system = require('./analytics/system');
+// system.monitorSystem();
 
+const MainStrategy = require('./strategies/Main');
+const Binance = require('./exchanges/Binance');
+const { setup: setupGracefulExit } = require('./tools/gracefulExit');
 
 debugSystem(`Initializing Bot at PID ${process.pid}`);
 
-system.monitorSystem();
 
-// TODO 2 fix error telegram, if cant connect it breaks the bot (check README)
-// const { sendMessage } = telegram.init();
-const sendMessage = () => {};
+const spokesman = new Spokesman();
+const { sendMessage } = spokesman;
+
 const dataKeeper = new DataKeeper();
 const { symbols: processSymbols } = setupGracefulExit({ sendMessage });
 
 const pairs = Object.keys(dbManager.assetsDB);
 
 const postman = new Postman({ dataKeeper, dbManager, skipedSymbol: processSymbols.postmanSkiped });
-const binance = binanceApi({ beautify: false, sendMessage, pairs, postman });
+const listener = new Listener();
+
+const binance = new Binance();
 const bnbRest = binance.binanceRest();
 
 const init = fetcher({ binanceRest: bnbRest, pairs, sendMessage, postman });

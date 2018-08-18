@@ -1,7 +1,7 @@
 const debugLog = require('debug')('coinman:Postman');
 
 class Postman {
-  constructor({ dataKeeper, dbManager, skipedSymbol }) {
+  constructor({ dataKeeper, dbManager, extraInfoSymbol }) {
     this.dataKeeper = dataKeeper;
     this.dbManager = dbManager;
     this.skipedSymbol = skipedSymbol;

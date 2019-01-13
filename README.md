@@ -1,5 +1,15 @@
 # Coinman
 
+> This bot it not working! The features are not complete.
+
+> I didn't finish it and I can't see when I will start working on it again, so I am open sourcing it. Feel free to fork, do your own and contribute if you want.
+
+This is a bot for cryptocurrency and stock market. There is an API done for Binance.
+
+Strategies, exchanges and data source are all independent. You can run one exchange under one strategy and another with another strategy, with multiple coins and different strategies over time.
+
+The [data-collector](https://github.com/jpenna/data-collector) module is part of this project, you should run it with this module. This project is using my fork of the [binance](https://github.com/jpenna/binance) npm package.
+
 ## Account information (USER_DATA)
 
 ```json

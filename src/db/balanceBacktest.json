@@ -1,0 +1,812 @@
+{
+  "123": {
+    "asset": "123",
+    "free": 0,
+    "locked": 0
+  },
+  "456": {
+    "asset": "456",
+    "free": 0,
+    "locked": 0
+  },
+  "BTC": {
+    "asset": "BTC",
+    "free": 0.01050753,
+    "locked": 0
+  },
+  "LTC": {
+    "asset": "LTC",
+    "free": 0,
+    "locked": 0
+  },
+  "ETH": {
+    "asset": "ETH",
+    "free": 0.84313176,
+    "locked": 0
+  },
+  "BNC": {
+    "asset": "BNC",
+    "free": 0,
+    "locked": 0
+  },
+  "ICO": {
+    "asset": "ICO",
+    "free": 0,
+    "locked": 0
+  },
+  "NEO": {
+    "asset": "NEO",
+    "free": 0,
+    "locked": 0
+  },
+  "BNB": {
+    "asset": "BNB",
+    "free": 63.18100382,
+    "locked": 0
+  },
+  "QTUM": {
+    "asset": "QTUM",
+    "free": 5.29,
+    "locked": 0
+  },
+  "EOS": {
+    "asset": "EOS",
+    "free": 0,
+    "locked": 0
+  },
+  "SNT": {
+    "asset": "SNT",
+    "free": 0,
+    "locked": 0
+  },
+  "BNT": {
+    "asset": "BNT",
+    "free": 0,
+    "locked": 0
+  },
+  "GAS": {
+    "asset": "GAS",
+    "free": 0,
+    "locked": 0
+  },
+  "BCC": {
+    "asset": "BCC",
+    "free": 0,
+    "locked": 0
+  },
+  "BTM": {
+    "asset": "BTM",
+    "free": 0,
+    "locked": 0
+  },
+  "USDT": {
+    "asset": "USDT",
+    "free": 0.006544,
+    "locked": 0
+  },
+  "HCC": {
+    "asset": "HCC",
+    "free": 0,
+    "locked": 0
+  },
+  "HSR": {
+    "asset": "HSR",
+    "free": 0,
+    "locked": 0
+  },
+  "OAX": {
+    "asset": "OAX",
+    "free": 0,
+    "locked": 0
+  },
+  "DNT": {
+    "asset": "DNT",
+    "free": 0,
+    "locked": 0
+  },
+  "MCO": {
+    "asset": "MCO",
+    "free": 0,
+    "locked": 0
+  },
+  "ICN": {
+    "asset": "ICN",
+    "free": 0,
+    "locked": 0
+  },
+  "ELC": {
+    "asset": "ELC",
+    "free": 0,
+    "locked": 0
+  },
+  "PAY": {
+    "asset": "PAY",
+    "free": 0,
+    "locked": 0
+  },
+  "ZRX": {
+    "asset": "ZRX",
+    "free": 0,
+    "locked": 0
+  },
+  "OMG": {
+    "asset": "OMG",
+    "free": 0,
+    "locked": 0
+  },
+  "WTC": {
+    "asset": "WTC",
+    "free": 0,
+    "locked": 0
+  },
+  "LRX": {
+    "asset": "LRX",
+    "free": 0,
+    "locked": 0
+  },
+  "YOYO": {
+    "asset": "YOYO",
+    "free": 0,
+    "locked": 0
+  },
+  "LRC": {
+    "asset": "LRC",
+    "free": 0,
+    "locked": 0
+  },
+  "LLT": {
+    "asset": "LLT",
+    "free": 0,
+    "locked": 0
+  },
+  "TRX": {
+    "asset": "TRX",
+    "free": 0,
+    "locked": 0
+  },
+  "FID": {
+    "asset": "FID",
+    "free": 0,
+    "locked": 0
+  },
+  "SNGLS": {
+    "asset": "SNGLS",
+    "free": 0,
+    "locked": 0
+  },
+  "STRAT": {
+    "asset": "STRAT",
+    "free": 0,
+    "locked": 0
+  },
+  "BQX": {
+    "asset": "BQX",
+    "free": 0,
+    "locked": 0
+  },
+  "FUN": {
+    "asset": "FUN",
+    "free": 0,
+    "locked": 0
+  },
+  "KNC": {
+    "asset": "KNC",
+    "free": 0,
+    "locked": 0
+  },
+  "CDT": {
+    "asset": "CDT",
+    "free": 0,
+    "locked": 0
+  },
+  "XVG": {
+    "asset": "XVG",
+    "free": 5964,
+    "locked": 0
+  },
+  "IOTA": {
+    "asset": "IOTA",
+    "free": 0,
+    "locked": 0
+  },
+  "SNM": {
+    "asset": "SNM",
+    "free": 0,
+    "locked": 0
+  },
+  "LINK": {
+    "asset": "LINK",
+    "free": 0,
+    "locked": 0
+  },
+  "CVC": {
+    "asset": "CVC",
+    "free": 0,
+    "locked": 0
+  },
+  "TNT": {
+    "asset": "TNT",
+    "free": 0,
+    "locked": 0
+  },
+  "REP": {
+    "asset": "REP",
+    "free": 0,
+    "locked": 0
+  },
+  "CTR": {
+    "asset": "CTR",
+    "free": 0,
+    "locked": 0
+  },
+  "MDA": {
+    "asset": "MDA",
+    "free": 0,
+    "locked": 0
+  },
+  "MTL": {
+    "asset": "MTL",
+    "free": 0,
+    "locked": 0
+  },
+  "SALT": {
+    "asset": "SALT",
+    "free": 0,
+    "locked": 0
+  },
+  "NULS": {
+    "asset": "NULS",
+    "free": 0,
+    "locked": 0
+  },
+  "SUB": {
+    "asset": "SUB",
+    "free": 0,
+    "locked": 0
+  },
+  "STX": {
+    "asset": "STX",
+    "free": 0,
+    "locked": 0
+  },
+  "MTH": {
+    "asset": "MTH",
+    "free": 0,
+    "locked": 0
+  },
+  "CAT": {
+    "asset": "CAT",
+    "free": 0,
+    "locked": 0
+  },
+  "ADX": {
+    "asset": "ADX",
+    "free": 0,
+    "locked": 0
+  },
+  "PIX": {
+    "asset": "PIX",
+    "free": 0,
+    "locked": 0
+  },
+  "ETC": {
+    "asset": "ETC",
+    "free": 0,
+    "locked": 0
+  },
+  "ENG": {
+    "asset": "ENG",
+    "free": 0,
+    "locked": 0
+  },
+  "ZEC": {
+    "asset": "ZEC",
+    "free": 0,
+    "locked": 0
+  },
+  "AST": {
+    "asset": "AST",
+    "free": 0,
+    "locked": 0
+  },
+  "1ST": {
+    "asset": "1ST",
+    "free": 0,
+    "locked": 0
+  },
+  "GNT": {
+    "asset": "GNT",
+    "free": 0,
+    "locked": 0
+  },
+  "DGD": {
+    "asset": "DGD",
+    "free": 0,
+    "locked": 0
+  },
+  "BAT": {
+    "asset": "BAT",
+    "free": 0,
+    "locked": 0
+  },
+  "DASH": {
+    "asset": "DASH",
+    "free": 0,
+    "locked": 0
+  },
+  "POWR": {
+    "asset": "POWR",
+    "free": 0,
+    "locked": 0
+  },
+  "BTG": {
+    "asset": "BTG",
+    "free": 0,
+    "locked": 0
+  },
+  "REQ": {
+    "asset": "REQ",
+    "free": 0,
+    "locked": 0
+  },
+  "XMR": {
+    "asset": "XMR",
+    "free": 0,
+    "locked": 0
+  },
+  "EVX": {
+    "asset": "EVX",
+    "free": 0,
+    "locked": 0
+  },
+  "VIB": {
+    "asset": "VIB",
+    "free": 0,
+    "locked": 0
+  },
+  "ENJ": {
+    "asset": "ENJ",
+    "free": 15,
+    "locked": 0
+  },
+  "VEN": {
+    "asset": "VEN",
+    "free": 0,
+    "locked": 0
+  },
+  "CAG": {
+    "asset": "CAG",
+    "free": 0,
+    "locked": 0
+  },
+  "EDG": {
+    "asset": "EDG",
+    "free": 0,
+    "locked": 0
+  },
+  "ARK": {
+    "asset": "ARK",
+    "free": 0,
+    "locked": 0
+  },
+  "XRP": {
+    "asset": "XRP",
+    "free": 123,
+    "locked": 0
+  },
+  "MOD": {
+    "asset": "MOD",
+    "free": 0,
+    "locked": 0
+  },
+  "AVT": {
+    "asset": "AVT",
+    "free": 0,
+    "locked": 0
+  },
+  "STORJ": {
+    "asset": "STORJ",
+    "free": 0,
+    "locked": 0
+  },
+  "KMD": {
+    "asset": "KMD",
+    "free": 0,
+    "locked": 0
+  },
+  "RCN": {
+    "asset": "RCN",
+    "free": 0,
+    "locked": 0
+  },
+  "EDO": {
+    "asset": "EDO",
+    "free": 0,
+    "locked": 0
+  },
+  "QASH": {
+    "asset": "QASH",
+    "free": 0,
+    "locked": 0
+  },
+  "SAN": {
+    "asset": "SAN",
+    "free": 0,
+    "locked": 0
+  },
+  "DATA": {
+    "asset": "DATA",
+    "free": 0,
+    "locked": 0
+  },
+  "DLT": {
+    "asset": "DLT",
+    "free": 0,
+    "locked": 0
+  },
+  "GUP": {
+    "asset": "GUP",
+    "free": 0,
+    "locked": 0
+  },
+  "MCAP": {
+    "asset": "MCAP",
+    "free": 0,
+    "locked": 0
+  },
+  "MANA": {
+    "asset": "MANA",
+    "free": 0,
+    "locked": 0
+  },
+  "PPT": {
+    "asset": "PPT",
+    "free": 0,
+    "locked": 0
+  },
+  "OTN": {
+    "asset": "OTN",
+    "free": 0,
+    "locked": 0
+  },
+  "CFD": {
+    "asset": "CFD",
+    "free": 0,
+    "locked": 0
+  },
+  "RDN": {
+    "asset": "RDN",
+    "free": 0,
+    "locked": 0
+  },
+  "GXS": {
+    "asset": "GXS",
+    "free": 0,
+    "locked": 0
+  },
+  "AMB": {
+    "asset": "AMB",
+    "free": 0,
+    "locked": 0
+  },
+  "ARN": {
+    "asset": "ARN",
+    "free": 0,
+    "locked": 0
+  },
+  "BCPT": {
+    "asset": "BCPT",
+    "free": 3,
+    "locked": 0
+  },
+  "CND": {
+    "asset": "CND",
+    "free": 0,
+    "locked": 0
+  },
+  "GVT": {
+    "asset": "GVT",
+    "free": 0,
+    "locked": 0
+  },
+  "POE": {
+    "asset": "POE",
+    "free": 0,
+    "locked": 0
+  },
+  "ALIS": {
+    "asset": "ALIS",
+    "free": 0,
+    "locked": 0
+  },
+  "BTS": {
+    "asset": "BTS",
+    "free": 0,
+    "locked": 0
+  },
+  "FUEL": {
+    "asset": "FUEL",
+    "free": 0,
+    "locked": 0
+  },
+  "XZC": {
+    "asset": "XZC",
+    "free": 0,
+    "locked": 0
+  },
+  "QSP": {
+    "asset": "QSP",
+    "free": 0,
+    "locked": 0
+  },
+  "LSK": {
+    "asset": "LSK",
+    "free": 0,
+    "locked": 0
+  },
+  "BCD": {
+    "asset": "BCD",
+    "free": 0,
+    "locked": 0
+  },
+  "TNB": {
+    "asset": "TNB",
+    "free": 0,
+    "locked": 0
+  },
+  "GRX": {
+    "asset": "GRX",
+    "free": 0,
+    "locked": 0
+  },
+  "STAR": {
+    "asset": "STAR",
+    "free": 0,
+    "locked": 0
+  },
+  "ADA": {
+    "asset": "ADA",
+    "free": 3131,
+    "locked": 0
+  },
+  "LEND": {
+    "asset": "LEND",
+    "free": 0,
+    "locked": 0
+  },
+  "IFT": {
+    "asset": "IFT",
+    "free": 0,
+    "locked": 0
+  },
+  "KICK": {
+    "asset": "KICK",
+    "free": 0,
+    "locked": 0
+  },
+  "UKG": {
+    "asset": "UKG",
+    "free": 0,
+    "locked": 0
+  },
+  "VOISE": {
+    "asset": "VOISE",
+    "free": 0,
+    "locked": 0
+  },
+  "XLM": {
+    "asset": "XLM",
+    "free": 2198,
+    "locked": 0
+  },
+  "CMT": {
+    "asset": "CMT",
+    "free": 0,
+    "locked": 0
+  },
+  "WAVES": {
+    "asset": "WAVES",
+    "free": 0,
+    "locked": 0
+  },
+  "WABI": {
+    "asset": "WABI",
+    "free": 0,
+    "locked": 0
+  },
+  "SBTC": {
+    "asset": "SBTC",
+    "free": 0,
+    "locked": 0
+  },
+  "BCX": {
+    "asset": "BCX",
+    "free": 0,
+    "locked": 0
+  },
+  "GTO": {
+    "asset": "GTO",
+    "free": 0,
+    "locked": 0
+  },
+  "ETF": {
+    "asset": "ETF",
+    "free": 0,
+    "locked": 0
+  },
+  "ICX": {
+    "asset": "ICX",
+    "free": 0,
+    "locked": 0
+  },
+  "OST": {
+    "asset": "OST",
+    "free": 0,
+    "locked": 0
+  },
+  "ELF": {
+    "asset": "ELF",
+    "free": 0,
+    "locked": 0
+  },
+  "AION": {
+    "asset": "AION",
+    "free": 0,
+    "locked": 0
+  },
+  "WINGS": {
+    "asset": "WINGS",
+    "free": 0,
+    "locked": 0
+  },
+  "BRD": {
+    "asset": "BRD",
+    "free": 0,
+    "locked": 0
+  },
+  "NEBL": {
+    "asset": "NEBL",
+    "free": 0,
+    "locked": 0
+  },
+  "NAV": {
+    "asset": "NAV",
+    "free": 0,
+    "locked": 0
+  },
+  "VIBE": {
+    "asset": "VIBE",
+    "free": 0,
+    "locked": 0
+  },
+  "LUN": {
+    "asset": "LUN",
+    "free": 7.16,
+    "locked": 0
+  },
+  "TRIG": {
+    "asset": "TRIG",
+    "free": 0,
+    "locked": 0
+  },
+  "APPC": {
+    "asset": "APPC",
+    "free": 0,
+    "locked": 0
+  },
+  "CHAT": {
+    "asset": "CHAT",
+    "free": 0,
+    "locked": 0
+  },
+  "RLC": {
+    "asset": "RLC",
+    "free": 0,
+    "locked": 0
+  },
+  "INS": {
+    "asset": "INS",
+    "free": 0,
+    "locked": 0
+  },
+  "PIVX": {
+    "asset": "PIVX",
+    "free": 0,
+    "locked": 0
+  },
+  "IOST": {
+    "asset": "IOST",
+    "free": 0,
+    "locked": 0
+  },
+  "STEEM": {
+    "asset": "STEEM",
+    "free": 0,
+    "locked": 0
+  },
+  "NANO": {
+    "asset": "NANO",
+    "free": 0,
+    "locked": 0
+  },
+  "AE": {
+    "asset": "AE",
+    "free": 0,
+    "locked": 0
+  },
+  "VIA": {
+    "asset": "VIA",
+    "free": 0,
+    "locked": 0
+  },
+  "BLZ": {
+    "asset": "BLZ",
+    "free": 0,
+    "locked": 0
+  },
+  "SYS": {
+    "asset": "SYS",
+    "free": 0,
+    "locked": 0
+  },
+  "RPX": {
+    "asset": "RPX",
+    "free": 0,
+    "locked": 0
+  },
+  "NCASH": {
+    "asset": "NCASH",
+    "free": 0,
+    "locked": 0
+  },
+  "POA": {
+    "asset": "POA",
+    "free": 0,
+    "locked": 0
+  },
+  "ONT": {
+    "asset": "ONT",
+    "free": 0,
+    "locked": 0
+  },
+  "ZIL": {
+    "asset": "ZIL",
+    "free": 0,
+    "locked": 0
+  },
+  "STORM": {
+    "asset": "STORM",
+    "free": 0,
+    "locked": 0
+  },
+  "XEM": {
+    "asset": "XEM",
+    "free": 0,
+    "locked": 0
+  },
+  "WAN": {
+    "asset": "WAN",
+    "free": 0,
+    "locked": 0
+  },
+  "WPR": {
+    "asset": "WPR",
+    "free": 0,
+    "locked": 0
+  },
+  "QLC": {
+    "asset": "QLC",
+    "free": 0,
+    "locked": 0
+  },
+  "GRS": {
+    "asset": "GRS",
+    "free": 0,
+    "locked": 0
+  },
+  "CLOAK": {
+    "asset": "CLOAK",
+    "free": 0,
+    "locked": 0
+  }
+}

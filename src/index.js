@@ -25,13 +25,15 @@ debugSystem(`Initializing Bot at PID ${process.pid}`);
 // const pairs = ['ETHBTC', 'LUNBTC', 'XVGBTC', 'ARKBTC'];
 const pairs = ['ETHBTC'];
 
+const exchangeList = [{ name: 'BNB', pairs }];
+
 const spokesman = new Spokesman();
 const { sendMessage } = spokesman;
 
 const dataKeeper = new DataKeeper();
 
 const postman = new Postman({ dataKeeper });
-const listener = new Listener({ pairs, postman });
+const listener = new Listener({ exchangeList, postman });
 
 const { fetchInitialData } = fetcher({ pairs, binanceRest, sendMessage });
 
@@ -42,6 +44,8 @@ const mainStrategy = new MainStrategy({ dataKeeper, broker, postman, sendMessage
 let interval = 1000;
 
 (async function startBot() {
+  if (process.env.BACKTEST) return;
+
   let data;
 
   try {

@@ -2,12 +2,12 @@ const logger = require('debug')('coinman:listener');
 const WebSocket = require('ws');
 
 class Listener {
-  constructor({ pairs, postman }) {
+  constructor({ exchangeList, postman }) {
     this.ws = new WebSocket(`ws://localhost:${process.env.COLLECTOR_WS_PORT}`, {
       auth: process.env.PASSWORD_WS,
       // TODO the client should subscribe to the pairs it want to listen
     });
-    this.pairs = pairs;
+    this.exchangeList = exchangeList;
     this.setup();
   }
 
@@ -21,6 +21,12 @@ class Listener {
         this.ws.send = (msg) => {
           send(JSON.stringify(msg));
         };
+
+        this.exchangeList.forEach(exchange => this.ws.send({
+          t: 'subscribe',
+          e: exchange.name,
+          p: exchange.pairs,
+        }));
       })
 
       // .on('close', () => {

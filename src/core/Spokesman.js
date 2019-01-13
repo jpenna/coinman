@@ -8,6 +8,11 @@ class Spokesman {
     this.whiteList = JSON.parse(process.env.TELEGRAM_WHITE_LIST);
     this.bot = new Telegraf(process.env.TELEGRAM_TOKEN);
 
+    if (process.env.BACKTEST) {
+      Spokesman.prototype.sendMessage = () => {};
+      return;
+    }
+
     this.setupTelegram();
   }
 

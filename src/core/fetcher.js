@@ -1,15 +1,45 @@
 const debug = require('debug')('coinman:fetcher');
 const errorsLog = require('simple-node-logger').createSimpleFileLogger('logs/errors.log');
 
+const config = require('../config');
+
 const fs = require('fs');
 
 module.exports = ({ pairs, binanceRest, sendMessage }) => ({
   fetchInitialData() {
-    const klines = pairs.map(pair => binanceRest.klines({
-      symbol: pair,
-      limit: 8,
-      interval: '30m',
-    }));
+    const klines = pairs.map(async (pair) => {
+      const res = await binanceRest.klines({
+        symbol: pair,
+        limit: config.initialFetchKlineLimit,
+        interval: `${config.initialFetchKlineInterval}m`,
+      });
+      // Reorder the way collector collects
+      return res.map(([
+        openTime,
+        open,
+        high,
+        low,
+        close,
+        volumeQuote,
+        closeTime,
+        baseVolume,
+        numberOfTrades,
+        takerBuyVolumeQuote,
+        takerBuyVolumeBase,
+      ]) => ([
+        openTime,
+        closeTime,
+        open,
+        close,
+        high,
+        low,
+        volumeQuote,
+        baseVolume,
+        takerBuyVolumeQuote,
+        takerBuyVolumeBase,
+        numberOfTrades,
+      ]));
+    });
 
     const balance = binanceRest.account()
       .then((data) => {
